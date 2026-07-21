@@ -1,0 +1,842 @@
+/* ============================================================
+   ঘরোয়া (Ghoroa) — Main Application JavaScript
+   বাংলাদেশের হোমমেড প্রোডাক্ট মার্কেটপ্লেস
+   ============================================================ */
+
+// ==================== HELPER FUNCTIONS ====================
+
+function toBanglaNumber(num) {
+  const banglaDigits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+  return String(num).replace(/[0-9]/g, d => banglaDigits[d]);
+}
+
+function formatPrice(num) {
+  return `৳ ${toBanglaNumber(num.toLocaleString('en-IN'))}`;
+}
+
+function getNextDay(dayOfWeek) {
+  const today = new Date();
+  const result = new Date(today);
+  const diff = (7 + dayOfWeek - today.getDay()) % 7 || 7;
+  result.setDate(today.getDate() + diff);
+  result.setHours(10, 0, 0, 0);
+  return result;
+}
+
+function getNextFriday() { return getNextDay(5); }
+function getNextSaturday() { return getNextDay(6); }
+function getNextSunday() { return getNextDay(0); }
+
+function formatBanglaDate(date) {
+  const days = ['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
+  const months = ['জানুয়ারি','ফেব্রুয়ারি','মার্চ','এপ্রিল','মে','জুন','জুলাই','আগস্ট','সেপ্টেম্বর','অক্টোবর','নভেম্বর','ডিসেম্বর'];
+  return `${days[date.getDay()]}, ${toBanglaNumber(date.getDate())} ${months[date.getMonth()]}`;
+}
+
+function generateStars(rating) {
+  let html = '';
+  const full = Math.floor(rating);
+  const hasHalf = rating % 1 >= 0.5;
+  for (let i = 0; i < full; i++) html += '★';
+  if (hasHalf) html += '★';
+  const empty = 5 - full - (hasHalf ? 1 : 0);
+  for (let i = 0; i < empty; i++) html += '☆';
+  return html;
+}
+
+function showToast(message) {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  container.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+  });
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400);
+  }, 3500);
+}
+
+// ==================== DATA ====================
+
+const PRODUCTS = [
+  {
+    id: 1,
+    name: 'নানির আমের আচার',
+    price: 350,
+    category: 'food',
+    area: 'mirpur',
+    areaName: 'মিরপুর',
+    seller: 'ফাতেমা বেগম',
+    rating: 4.8,
+    reviews: 124,
+    image: 'assets/achar.jpg',
+    story: 'আমার নানি ৪০ বছর ধরে এই আচার বানাচ্ছেন। কাঁচা আম, সরিষার তেল, আর গোপন মসলার মিশ্রণে তৈরি এই আচার একবার খেলে ভুলতে পারবেন না। প্রতিটি বয়াম হাতে বানানো, কোনো প্রিজার্ভেটিভ নেই।',
+    badge: 'বেস্ট সেলার',
+    featured: true
+  },
+  {
+    id: 2,
+    name: 'নকশিকাঁথা কুশন কভার',
+    price: 850,
+    category: 'handicraft',
+    area: 'jatrabari',
+    areaName: 'যাত্রাবাড়ী',
+    seller: 'রাহেলা আক্তার',
+    rating: 4.9,
+    reviews: 87,
+    image: 'assets/kantha.jpg',
+    story: 'গ্রাম বাংলার ঐতিহ্যবাহী নকশিকাঁথার ডিজাইনে তৈরি এই কুশন কভার। প্রতিটি সুই ফোঁড়ে লুকিয়ে আছে আমাদের মায়েদের ভালোবাসা। সম্পূর্ণ হাতের কাজ, প্রতিটি পিস ইউনিক।',
+    badge: 'হ্যান্ডমেড',
+    featured: true
+  },
+  {
+    id: 3,
+    name: 'ভাপা পিঠা (১২ পিস)',
+    price: 250,
+    category: 'food',
+    area: 'mohammadpur',
+    areaName: 'মোহাম্মদপুর',
+    seller: 'নাসরিন সুলতানা',
+    rating: 4.7,
+    reviews: 203,
+    image: 'assets/pitha.jpg',
+    story: 'শীতের সকালে গরম গরম ভাপা পিঠার স্বাদ কে না চায়! খেজুরের গুড় আর নারকেল দিয়ে তৈরি আমার মায়ের রেসিপির পিঠা। অর্ডার দিলে সকালে তাজা বানিয়ে পাঠানো হয়।',
+    badge: 'সিজনাল',
+    featured: true
+  },
+  {
+    id: 4,
+    name: 'জামদানি শাড়ি',
+    price: 4500,
+    category: 'clothing',
+    area: 'dhanmondi',
+    areaName: 'ধানমন্ডি',
+    seller: 'সাবরিনা ইসলাম',
+    rating: 5.0,
+    reviews: 56,
+    image: 'assets/jamdani.jpg',
+    story: 'ঢাকাই জামদানি — বাংলাদেশের গর্ব, ইউনেস্কো স্বীকৃত ঐতিহ্য। সরাসরি তাঁতিদের কাছ থেকে সংগ্রহ করা অরিজিনাল জামদানি। প্রতিটি শাড়ি একটি শিল্পকর্ম।',
+    badge: 'প্রিমিয়াম',
+    featured: true
+  },
+  {
+    id: 5,
+    name: 'রিকশা আর্ট ফ্রেম',
+    price: 1200,
+    category: 'art',
+    area: 'puran-dhaka',
+    areaName: 'পুরান ঢাকা',
+    seller: 'কামরুল হাসান',
+    rating: 4.6,
+    reviews: 42,
+    image: 'assets/rickshaw.jpg',
+    story: 'পুরান ঢাকার রিকশা পেইন্টিং — বাংলাদেশের অনন্য ফোক আর্ট। প্রতিটি ফ্রেম হাতে আঁকা, প্রতিটি রঙে আছে ঢাকার গল্প। আপনার ঘরে এনে দিন ঢাকার রঙিন ঐতিহ্য।',
+    badge: 'আর্টিজান',
+    featured: true
+  },
+  {
+    id: 6,
+    name: 'খাঁটি ঘানি সরিষার তেল',
+    price: 320,
+    category: 'natural',
+    area: 'uttara',
+    areaName: 'উত্তরা',
+    seller: 'মোহাম্মদ রফিক',
+    rating: 4.8,
+    reviews: 178,
+    image: 'assets/oil.jpg',
+    story: 'ঘানিতে ভাঙা খাঁটি সরিষার তেল — কোনো কেমিক্যাল নেই, কোনো ভেজাল নেই। গ্রাম থেকে সরাসরি আপনার ঘরে। রান্না থেকে চুলের যত্ন — সব কাজে অসাধারণ।',
+    badge: 'অর্গানিক',
+    featured: true
+  },
+  {
+    id: 7,
+    name: 'কাস্টম গিফট হ্যাম্পার',
+    price: 1500,
+    category: 'gift',
+    area: 'gulshan',
+    areaName: 'গুলশান',
+    seller: 'তানজিনা আহমেদ',
+    rating: 4.9,
+    reviews: 93,
+    image: 'assets/gift.jpg',
+    story: 'জন্মদিন, বিয়ে, বা যেকোনো উৎসবে — আপনার পছন্দমতো কাস্টম গিফট বক্স তৈরি করে দিই। মধু, সাবান, শুকনো ফুল, এমব্রয়ডারি পাউচ — সব কিছু হ্যান্ডমেড।',
+    badge: 'কাস্টম',
+    featured: false
+  },
+  {
+    id: 8,
+    name: 'মাটির পাত্র সেট',
+    price: 650,
+    category: 'handicraft',
+    area: 'rampura',
+    areaName: 'রামপুরা',
+    seller: 'আবদুল কাদের',
+    rating: 4.5,
+    reviews: 31,
+    image: 'assets/pottery.jpg',
+    story: 'হাতে গড়া মাটির পাত্র — বাংলার প্রাচীন শিল্প। প্রতিটি পাত্র তৈরিতে লাগে ৩ দিন। মাটির সোঁদা গন্ধে ফিরে যান শৈশবের গ্রামে।',
+    badge: 'ঐতিহ্য',
+    featured: false
+  }
+];
+
+const HAATS = [
+  {
+    id: 1,
+    title: 'পিঠা উৎসব',
+    seller: 'নাসরিন সুলতানা',
+    area: 'মোহাম্মদপুর',
+    description: 'শীতের স্পেশাল — ভাপা, পাটিসাপটা, চিতই পিঠা!',
+    date: getNextFriday(),
+    products: 8,
+    isLive: false
+  },
+  {
+    id: 2,
+    title: 'আচারের মেলা',
+    seller: 'ফাতেমা বেগম',
+    area: 'মিরপুর',
+    description: 'আমের আচার, তেঁতুলের আচার, জলপাইয়ের আচার — সব এক জায়গায়!',
+    date: getNextSaturday(),
+    products: 12,
+    isLive: true
+  },
+  {
+    id: 3,
+    title: 'হস্তশিল্প প্রদর্শনী',
+    seller: 'রাহেলা আক্তার',
+    area: 'যাত্রাবাড়ী',
+    description: 'নকশিকাঁথা, শীতলপাটি, বাঁশের ঝুড়ি — গ্রাম বাংলার শিল্প',
+    date: getNextSunday(),
+    products: 15,
+    isLive: false
+  }
+];
+
+const AREAS = [
+  { id: 'uttara', name: 'উত্তরা', sellers: 45 },
+  { id: 'mirpur', name: 'মিরপুর', sellers: 78 },
+  { id: 'dhanmondi', name: 'ধানমন্ডি', sellers: 62 },
+  { id: 'mohammadpur', name: 'মোহাম্মদপুর', sellers: 53 },
+  { id: 'gulshan', name: 'গুলশান', sellers: 34 },
+  { id: 'banani', name: 'বনানী', sellers: 28 },
+  { id: 'bashundhara', name: 'বসুন্ধরা', sellers: 41 },
+  { id: 'shyamoli', name: 'শ্যামলী', sellers: 36 },
+  { id: 'rampura', name: 'রামপুরা', sellers: 47 },
+  { id: 'jatrabari', name: 'যাত্রাবাড়ী', sellers: 39 },
+  { id: 'motijheel', name: 'মতিঝিল', sellers: 25 },
+  { id: 'puran-dhaka', name: 'পুরান ঢাকা', sellers: 58 }
+];
+
+const CATEGORIES = [
+  { id: 'food', name: 'ঘরে তৈরি খাবার', icon: '🍯', count: 342, desc: 'আচার, পিঠা, মিষ্টি, ভর্তা' },
+  { id: 'handicraft', name: 'হস্তশিল্প', icon: '🧵', count: 187, desc: 'নকশিকাঁথা, মাটির পাত্র, বাঁশের কাজ' },
+  { id: 'clothing', name: 'ঐতিহ্যবাহী পোশাক', icon: '👗', count: 156, desc: 'জামদানি, টাঙ্গাইল, ব্লক প্রিন্ট' },
+  { id: 'art', name: 'আর্ট ও ডিজাইন', icon: '🎨', count: 98, desc: 'রিকশা আর্ট, আলপনা, ক্যালিগ্রাফি' },
+  { id: 'natural', name: 'প্রাকৃতিক প্রোডাক্ট', icon: '🌿', count: 124, desc: 'ঘানির তেল, মধু, ভেষজ সাবান' },
+  { id: 'gift', name: 'কাস্টম গিফট', icon: '🎁', count: 76, desc: 'গিফট বক্স, পার্সোনালাইজড আইটেম' }
+];
+
+const TESTIMONIALS = [
+  {
+    name: 'ফাতেমা বেগম',
+    area: 'মিরপুর',
+    text: 'আগে ফেসবুক গ্রুপে আচার বিক্রি করতাম, মাসে ৫-৬ হাজার টাকা আয় হতো। ঘরোয়ায় দোকান খোলার পর এখন মাসে ২৫,০০০+ টাকা আয় করি!',
+    earnings: '২৫,০০০+',
+    months: '৬ মাস'
+  },
+  {
+    name: 'রাহেলা আক্তার',
+    area: 'যাত্রাবাড়ী',
+    text: 'নকশিকাঁথা বানানো আমার নেশা ছিল, এখন পেশা। ঘরোয়ার "গল্পের দোকান" ফিচারের কারণে কাস্টমাররা আমার কাজের মূল্য বোঝেন।',
+    earnings: '৩৫,০০০+',
+    months: '৮ মাস'
+  },
+  {
+    name: 'কামরুল হাসান',
+    area: 'পুরান ঢাকা',
+    text: 'রিকশা আর্ট এখন শুধু রিকশায় না, ঘরে ঘরে শোভা পাচ্ছে। ঘরোয়া আমাকে সারা ঢাকায় পরিচিত করে দিয়েছে।',
+    earnings: '২০,০০০+',
+    months: '৪ মাস'
+  },
+  {
+    name: 'তানজিনা আহমেদ',
+    area: 'গুলশান',
+    text: 'কর্পোরেট চাকরি ছেড়ে কাস্টম গিফট বিজনেস শুরু করেছি। ঘরোয়ার এরিয়া-ভিত্তিক সিস্টেম আমাকে গুলশান-বনানীর কাস্টমার পেতে সাহায্য করেছে।',
+    earnings: '৪৫,০০০+',
+    months: '১০ মাস'
+  }
+];
+
+const FAQS = [
+  { q: 'ঘরোয়ায় দোকান খুলতে কত খরচ?', a: 'সম্পূর্ণ ফ্রি! কোনো রেজিস্ট্রেশন ফি, মাসিক চার্জ বা কমিশন নেই। আপনি যা বিক্রি করবেন, পুরো টাকাটাই আপনার।' },
+  { q: 'কীভাবে পেমেন্ট নেব?', a: 'বিকাশ, নগদ, রকেট — যেকোনো মোবাইল ব্যাংকিং-এ সরাসরি পেমেন্ট নিতে পারবেন। ক্যাশ অন ডেলিভারিও সাপোর্ট করি।' },
+  { q: 'ডেলিভারি কীভাবে হবে?', a: 'আপনার এলাকায় নিজে ডেলিভারি দিতে পারেন (ফ্রি), অথবা আমাদের পার্টনার — পাঠাও, রেডএক্স, স্টেডফাস্ট-এর মাধ্যমে সারা ঢাকায় ডেলিভারি দিতে পারবেন।' },
+  { q: 'কী কী প্রোডাক্ট বিক্রি করতে পারব?', a: 'ঘরে তৈরি খাবার, হস্তশিল্প, পোশাক, আর্ট, প্রাকৃতিক প্রোডাক্ট, কাস্টম গিফট — যেকোনো হোমমেড বা হ্যান্ডমেড প্রোডাক্ট বিক্রি করতে পারবেন।' },
+  { q: '"হাটবার" কী?', a: 'হাটবার হলো আমাদের ইউনিক ফিচার — নির্দিষ্ট দিনে ও সময়ে আপনি একটি "ফ্ল্যাশ হাট" বসাতে পারবেন। যেমন "প্রতি শুক্রবার পিঠার হাট"। এতে কাস্টমারদের মধ্যে excitement তৈরি হয়, বিক্রি বাড়ে।' },
+  { q: 'আমি কি একাধিক ক্যাটাগরিতে প্রোডাক্ট রাখতে পারব?', a: 'অবশ্যই! আপনি একই দোকানে যত খুশি ক্যাটাগরিতে প্রোডাক্ট রাখতে পারবেন।' },
+  { q: 'ঘরোয়া কি শুধু ঢাকার জন্য?', a: 'আপাতত ঢাকার সব এলাকায় সার্ভিস দিচ্ছি। শীঘ্রই চট্টগ্রাম, সিলেট, রাজশাহীসহ সারা বাংলাদেশে সম্প্রসারিত হবে।' }
+];
+
+// ==================== STATE ====================
+
+let currentCategoryFilter = 'all';
+let currentAreaFilter = '';
+let searchQuery = '';
+
+// ==================== INITIALIZATION ====================
+
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  initMobileMenu();
+  initSmoothScroll();
+  initScrollAnimations();
+  initNavbarScroll();
+  initSearch();
+
+  renderCategories();
+  renderAreas();
+  renderProducts();
+  renderHaats();
+  renderTestimonials();
+  renderFAQs();
+  renderFilterButtons();
+
+  initCountdown();
+  initCounterAnimation();
+  initSellerForm();
+  initModalEvents();
+});
+
+// ==================== THEME ====================
+
+function initTheme() {
+  const saved = localStorage.getItem('ghoroa-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeToggle(saved);
+
+  document.getElementById('theme-toggle')?.addEventListener('click', toggleTheme);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('ghoroa-theme', next);
+  updateThemeToggle(next);
+}
+
+function updateThemeToggle(theme) {
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+
+// ==================== MOBILE MENU ====================
+
+function initMobileMenu() {
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  if (!btn || !menu) return;
+
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('active');
+    menu.classList.toggle('active');
+  });
+
+  // Close on link click
+  menu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      btn.classList.remove('active');
+      menu.classList.remove('active');
+    });
+  });
+}
+
+// ==================== SMOOTH SCROLL ====================
+
+function initSmoothScroll() {
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        const navHeight = document.querySelector('.navbar')?.offsetHeight || 0;
+        const y = target.getBoundingClientRect().top + window.pageYOffset - navHeight;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    });
+  });
+}
+
+// ==================== SCROLL ANIMATIONS ====================
+
+function initScrollAnimations() {
+  if (!window.IntersectionObserver) return;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+}
+
+// ==================== NAVBAR SCROLL ====================
+
+function initNavbarScroll() {
+  const navbar = document.getElementById('navbar');
+  if (!navbar) return;
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+  }, { passive: true });
+}
+
+// ==================== RENDER: CATEGORIES ====================
+
+function renderCategories() {
+  const grid = document.getElementById('category-grid');
+  if (!grid) return;
+
+  grid.innerHTML = CATEGORIES.map(cat => `
+    <div class="category-card glass animate-on-scroll" onclick="filterByCategory('${cat.id}')">
+      <div class="category-icon">${cat.icon}</div>
+      <h3 class="category-name">${cat.name}</h3>
+      <p class="category-desc">${cat.desc}</p>
+      <span class="category-count">${toBanglaNumber(cat.count)}টি পণ্য</span>
+    </div>
+  `).join('');
+}
+
+// ==================== RENDER: FILTER BUTTONS ====================
+
+function renderFilterButtons() {
+  const filterContainer = document.getElementById('product-filter');
+  if (!filterContainer) return;
+
+  const allBtn = `<button class="filter-btn active" data-filter="all" onclick="filterByCategory('all')">সব</button>`;
+  const catBtns = CATEGORIES.map(cat =>
+    `<button class="filter-btn" data-filter="${cat.id}" onclick="filterByCategory('${cat.id}')">${cat.icon} ${cat.name}</button>`
+  ).join('');
+
+  filterContainer.innerHTML = allBtn + catBtns;
+}
+
+// ==================== RENDER: AREAS ====================
+
+function renderAreas() {
+  const grid = document.getElementById('area-grid');
+  if (!grid) return;
+
+  grid.innerHTML = AREAS.map(area => `
+    <button class="area-tag ${currentAreaFilter === area.id ? 'active' : ''}" 
+            onclick="filterByArea('${area.id}')"
+            data-area="${area.id}">
+      📍 ${area.name}
+      <span class="area-seller-count">${toBanglaNumber(area.sellers)} সেলার</span>
+    </button>
+  `).join('');
+}
+
+// ==================== RENDER: PRODUCTS ====================
+
+function renderProducts() {
+  const grid = document.getElementById('product-grid');
+  if (!grid) return;
+
+  let filtered = [...PRODUCTS];
+
+  if (currentCategoryFilter !== 'all') {
+    filtered = filtered.filter(p => p.category === currentCategoryFilter);
+  }
+  if (currentAreaFilter) {
+    filtered = filtered.filter(p => p.area === currentAreaFilter);
+  }
+  if (searchQuery) {
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.seller.toLowerCase().includes(q) ||
+      p.areaName.includes(q) ||
+      p.story.toLowerCase().includes(q)
+    );
+  }
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="no-products">
+        <span class="no-products-icon">🔍</span>
+        <p>দুঃখিত, কোনো পণ্য পাওয়া যায়নি।</p>
+        <button class="btn btn-secondary" onclick="resetFilters()">সব পণ্য দেখুন</button>
+      </div>
+    `;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(p => `
+    <div class="product-card glass animate-on-scroll" onclick="openProductModal(${p.id})">
+      <div class="product-image">
+        <img src="${p.image}" alt="${p.name}" loading="lazy">
+        ${p.badge ? `<span class="product-badge">${p.badge}</span>` : ''}
+        <div class="product-overlay">
+          <span>বিস্তারিত দেখুন →</span>
+        </div>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">${p.name}</h3>
+        <p class="product-seller">🏪 ${p.seller} · 📍 ${p.areaName}</p>
+        <p class="product-story-snippet">${p.story.substring(0, 60)}...</p>
+        <div class="product-footer">
+          <span class="product-price">${formatPrice(p.price)}</span>
+          <span class="product-rating">
+            <span class="stars">${generateStars(p.rating)}</span>
+            <span class="review-count">${toBanglaNumber(p.rating)} (${toBanglaNumber(p.reviews)})</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Re-observe new elements
+  initScrollAnimations();
+}
+
+// ==================== RENDER: HAATS ====================
+
+function renderHaats() {
+  const grid = document.getElementById('haat-grid');
+  if (!grid) return;
+
+  grid.innerHTML = HAATS.map(haat => `
+    <div class="haat-card glass animate-on-scroll">
+      ${haat.isLive ? '<div class="live-badge"><span class="live-dot"></span> LIVE</div>' : ''}
+      <div class="haat-header">
+        <h3 class="haat-title">${haat.title}</h3>
+        <span class="haat-products">${toBanglaNumber(haat.products)}টি পণ্য</span>
+      </div>
+      <p class="haat-description">${haat.description}</p>
+      <div class="haat-meta">
+        <span class="haat-seller">🏪 ${haat.seller}</span>
+        <span class="haat-area">📍 ${haat.area}</span>
+      </div>
+      <div class="haat-date">
+        <span class="haat-date-icon">📅</span>
+        <span>${formatBanglaDate(haat.date)}</span>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="showToast('রিমাইন্ডার সেট করা হয়েছে! 🔔')">
+        🔔 রিমাইন্ডার সেট করুন
+      </button>
+    </div>
+  `).join('');
+}
+
+// ==================== RENDER: TESTIMONIALS ====================
+
+function renderTestimonials() {
+  const slider = document.getElementById('testimonial-slider');
+  if (!slider) return;
+
+  slider.innerHTML = TESTIMONIALS.map(t => `
+    <div class="testimonial-card glass animate-on-scroll">
+      <div class="testimonial-quote">❝</div>
+      <p class="testimonial-text">${t.text}</p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">${t.name.charAt(0)}</div>
+        <div class="testimonial-info">
+          <h4>${t.name}</h4>
+          <span>📍 ${t.area}</span>
+        </div>
+      </div>
+      <div class="testimonial-stats">
+        <div class="testimonial-stat">
+          <span class="stat-value">৳ ${t.earnings}</span>
+          <span class="stat-label">মাসিক আয়</span>
+        </div>
+        <div class="testimonial-stat">
+          <span class="stat-value">${t.months}</span>
+          <span class="stat-label">ঘরোয়ায় আছেন</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ==================== RENDER: FAQ ====================
+
+function renderFAQs() {
+  const list = document.getElementById('faq-list');
+  if (!list) return;
+
+  list.innerHTML = FAQS.map((faq, i) => `
+    <div class="faq-item glass animate-on-scroll">
+      <button class="faq-question" onclick="toggleFAQ(this)" aria-expanded="false">
+        <span>${faq.q}</span>
+        <span class="faq-icon">+</span>
+      </button>
+      <div class="faq-answer">
+        <p>${faq.a}</p>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleFAQ(btn) {
+  const item = btn.parentElement;
+  const isOpen = item.classList.contains('open');
+
+  // Close all
+  document.querySelectorAll('.faq-item.open').forEach(el => {
+    el.classList.remove('open');
+    el.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+  });
+
+  // Open clicked if was closed
+  if (!isOpen) {
+    item.classList.add('open');
+    btn.setAttribute('aria-expanded', 'true');
+  }
+}
+
+// ==================== FILTERS ====================
+
+function filterByCategory(categoryId) {
+  currentCategoryFilter = categoryId;
+
+  // Update filter button active state
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === categoryId);
+  });
+
+  renderProducts();
+
+  // Scroll to products
+  const section = document.getElementById('products');
+  if (section) {
+    const navHeight = document.querySelector('.navbar')?.offsetHeight || 0;
+    const y = section.getBoundingClientRect().top + window.pageYOffset - navHeight;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  }
+}
+
+function filterByArea(areaId) {
+  // Toggle: if same area, deselect
+  currentAreaFilter = currentAreaFilter === areaId ? '' : areaId;
+
+  // Update area tag active states
+  document.querySelectorAll('.area-tag').forEach(tag => {
+    tag.classList.toggle('active', tag.dataset.area === currentAreaFilter);
+  });
+
+  renderProducts();
+
+  const section = document.getElementById('products');
+  if (section) {
+    const navHeight = document.querySelector('.navbar')?.offsetHeight || 0;
+    const y = section.getBoundingClientRect().top + window.pageYOffset - navHeight;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  }
+}
+
+function resetFilters() {
+  currentCategoryFilter = 'all';
+  currentAreaFilter = '';
+  searchQuery = '';
+  const searchInput = document.getElementById('search-input');
+  if (searchInput) searchInput.value = '';
+  renderFilterButtons();
+  renderAreas();
+  renderProducts();
+}
+
+// ==================== SEARCH ====================
+
+function initSearch() {
+  const input = document.getElementById('search-input');
+  if (!input) return;
+
+  let debounceTimer;
+  input.addEventListener('input', (e) => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      searchQuery = e.target.value.trim();
+      renderProducts();
+    }, 300);
+  });
+}
+
+// ==================== MODAL ====================
+
+function initModalEvents() {
+  const modal = document.getElementById('product-modal');
+  const closeBtn = document.getElementById('modal-close');
+
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // Share buttons
+  document.querySelectorAll('.share-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const platform = btn.dataset.platform;
+      const url = window.location.href;
+      if (platform === 'facebook') {
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+      } else if (platform === 'whatsapp') {
+        window.open(`https://wa.me/?text=${encodeURIComponent('ঘরোয়া থেকে দেখুন! ' + url)}`, '_blank');
+      } else if (platform === 'copy') {
+        navigator.clipboard?.writeText(url).then(() => showToast('লিংক কপি হয়েছে! 📋'));
+      }
+    });
+  });
+}
+
+function openProductModal(productId) {
+  const product = PRODUCTS.find(p => p.id === productId);
+  if (!product) return;
+
+  const modal = document.getElementById('product-modal');
+  if (!modal) return;
+
+  // Fill modal data
+  document.getElementById('modal-image').src = product.image;
+  document.getElementById('modal-image').alt = product.name;
+  document.getElementById('modal-title').textContent = product.name;
+  document.getElementById('modal-price').textContent = formatPrice(product.price);
+  document.getElementById('modal-rating').innerHTML = `${generateStars(product.rating)} ${toBanglaNumber(product.rating)} (${toBanglaNumber(product.reviews)} রিভিউ)`;
+  document.getElementById('modal-badge').textContent = product.badge || '';
+  document.getElementById('modal-story-text').textContent = product.story;
+  document.getElementById('seller-name').textContent = product.seller;
+  document.getElementById('seller-area').textContent = `📍 ${product.areaName}`;
+  document.getElementById('seller-avatar').textContent = product.seller.charAt(0);
+
+  // WhatsApp link
+  const waMsg = encodeURIComponent(`হ্যালো, আমি ঘরোয়া থেকে "${product.name}" পণ্যটি কিনতে চাই। মূল্য: ${formatPrice(product.price)}`);
+  document.getElementById('modal-whatsapp').href = `https://wa.me/8801XXXXXXXXX?text=${waMsg}`;
+  document.getElementById('modal-messenger').href = `https://m.me/ghoroa.bd`;
+
+  // Show modal
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  const modal = document.getElementById('product-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+}
+
+// ==================== COUNTDOWN TIMER ====================
+
+function initCountdown() {
+  const daysEl = document.getElementById('countdown-days');
+  const hoursEl = document.getElementById('countdown-hours');
+  const minutesEl = document.getElementById('countdown-minutes');
+  const secondsEl = document.getElementById('countdown-seconds');
+
+  if (!daysEl) return;
+
+  // Find the nearest upcoming haat
+  const now = new Date();
+  const upcomingDates = HAATS.map(h => h.date).filter(d => d > now);
+  const nextHaat = upcomingDates.length > 0
+    ? upcomingDates.reduce((a, b) => a < b ? a : b)
+    : getNextFriday();
+
+  function update() {
+    const now = new Date();
+    const diff = nextHaat - now;
+
+    if (diff <= 0) {
+      daysEl.textContent = '০০';
+      hoursEl.textContent = '০০';
+      minutesEl.textContent = '০০';
+      secondsEl.textContent = '০০';
+      return;
+    }
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    daysEl.textContent = toBanglaNumber(String(days).padStart(2, '0'));
+    hoursEl.textContent = toBanglaNumber(String(hours).padStart(2, '0'));
+    minutesEl.textContent = toBanglaNumber(String(minutes).padStart(2, '0'));
+    secondsEl.textContent = toBanglaNumber(String(seconds).padStart(2, '0'));
+  }
+
+  update();
+  setInterval(update, 1000);
+}
+
+// ==================== COUNTER ANIMATION ====================
+
+function initCounterAnimation() {
+  const statNumbers = document.querySelectorAll('.stat-number[data-target]');
+  if (statNumbers.length === 0 || !window.IntersectionObserver) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const target = parseInt(el.dataset.target, 10);
+        animateCounter(el, target);
+        observer.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  statNumbers.forEach(el => observer.observe(el));
+}
+
+function animateCounter(el, target) {
+  const duration = 2000;
+  const startTime = performance.now();
+
+  function step(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    // Ease out cubic
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = Math.floor(eased * target);
+    el.textContent = toBanglaNumber(current) + '+';
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      el.textContent = toBanglaNumber(target) + '+';
+    }
+  }
+
+  requestAnimationFrame(step);
+}
+
+// ==================== SELLER FORM ====================
+
+function initSellerForm() {
+  const form = document.getElementById('seller-form');
+  if (!form) return;
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('seller-name-input')?.value;
+    showToast(`🎉 অভিনন্দন ${name}! আপনার দোকান সফলভাবে রেজিস্ট্রেশন হয়েছে!`);
+    form.reset();
+  });
+}
