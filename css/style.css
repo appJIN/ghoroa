@@ -1383,7 +1383,29 @@ button { cursor: pointer; }
 }
 .toast.show { transform: translateX(0); }
 
-/* ==================== 19. RESPONSIVE ==================== */
+/* ==================== 19. MOBILE SEARCH ==================== */
+
+.mobile-search-wrapper {
+  margin-bottom: 1.5rem;
+}
+.mobile-search-wrapper input {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  border-radius: 12px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+.mobile-search-wrapper input::placeholder {
+  color: var(--text-muted);
+}
+.mobile-search-wrapper input:focus {
+  border-color: var(--primary);
+}
+
+/* ==================== 20. RESPONSIVE ==================== */
 
 @media (max-width: 1024px) {
   .hero-container { grid-template-columns: 1fr; text-align: center; }

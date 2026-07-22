@@ -35,12 +35,9 @@ function formatBanglaDate(date) {
 
 function generateStars(rating) {
   let html = '';
-  const full = Math.floor(rating);
-  const hasHalf = rating % 1 >= 0.5;
-  for (let i = 0; i < full; i++) html += '★';
-  if (hasHalf) html += '★';
-  const empty = 5 - full - (hasHalf ? 1 : 0);
-  for (let i = 0; i < empty; i++) html += '☆';
+  const rounded = Math.round(rating);
+  for (let i = 0; i < rounded; i++) html += '★';
+  for (let i = rounded; i < 5; i++) html += '☆';
   return html;
 }
 
@@ -659,16 +656,54 @@ function resetFilters() {
 
 function initSearch() {
   const input = document.getElementById('search-input');
-  if (!input) return;
+  const mobileInput = document.getElementById('mobile-search-input');
+  const searchBtn = document.querySelector('.search-btn');
 
-  let debounceTimer;
-  input.addEventListener('input', (e) => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      searchQuery = e.target.value.trim();
-      renderProducts();
-    }, 300);
-  });
+  function performSearch(query) {
+    searchQuery = query.trim();
+    renderProducts();
+    // Auto scroll to products section
+    if (searchQuery) {
+      const section = document.getElementById('products');
+      if (section) {
+        const navHeight = document.querySelector('.navbar')?.offsetHeight || 0;
+        const y = section.getBoundingClientRect().top + window.pageYOffset - navHeight;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+      // Close mobile menu if open
+      document.getElementById('mobile-menu')?.classList.remove('active');
+      document.getElementById('mobile-menu-btn')?.classList.remove('active');
+    }
+  }
+
+  if (input) {
+    let debounceTimer;
+    input.addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        performSearch(e.target.value);
+        if (mobileInput) mobileInput.value = e.target.value;
+      }, 300);
+    });
+  }
+
+  if (mobileInput) {
+    let debounceTimer;
+    mobileInput.addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        performSearch(e.target.value);
+        if (input) input.value = e.target.value;
+      }, 300);
+    });
+  }
+
+  if (searchBtn) {
+    searchBtn.addEventListener('click', () => {
+      const query = input?.value || '';
+      performSearch(query);
+    });
+  }
 }
 
 // ==================== MODAL ====================
@@ -758,6 +793,8 @@ function initCountdown() {
     ? upcomingDates.reduce((a, b) => a < b ? a : b)
     : getNextFriday();
 
+  let countdownInterval;
+
   function update() {
     const now = new Date();
     const diff = nextHaat - now;
@@ -767,6 +804,7 @@ function initCountdown() {
       hoursEl.textContent = '০০';
       minutesEl.textContent = '০০';
       secondsEl.textContent = '০০';
+      if (countdownInterval) clearInterval(countdownInterval);
       return;
     }
 
@@ -782,7 +820,7 @@ function initCountdown() {
   }
 
   update();
-  setInterval(update, 1000);
+  countdownInterval = setInterval(update, 1000);
 }
 
 // ==================== COUNTER ANIMATION ====================

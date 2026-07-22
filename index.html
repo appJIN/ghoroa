@@ -9,6 +9,9 @@
   <meta property="og:title" content="ঘরোয়া — বাংলাদেশের হোমমেড মার্কেটপ্লেস">
   <meta property="og:description" content="ঘরে তৈরি, ঘরে থেকেই বিক্রি। ১০০% ফ্রি মার্কেটপ্লেস।">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://appjin.github.io/ghoroa/">
+  <meta property="og:image" content="https://appjin.github.io/ghoroa/assets/hero.jpg">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -47,6 +50,9 @@
 
     <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobile-menu">
+      <div class="mobile-search-wrapper">
+        <input type="text" id="mobile-search-input" placeholder="🔍 প্রোডাক্ট খুঁজুন..." aria-label="প্রোডাক্ট খুঁজুন">
+      </div>
       <ul>
         <li><a href="#hero">হোম</a></li>
         <li><a href="#categories">ক্যাটাগরি</a></li>
@@ -319,7 +325,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label for="seller-phone">মোবাইল নম্বর</label>
-                <input type="tel" id="seller-phone" placeholder="০১৭XXXXXXXX" required>
+                <input type="tel" id="seller-phone" placeholder="০১৭XXXXXXXX" required pattern="০১[৩-৯][০-৯]{8}|01[3-9][0-9]{8}" title="সঠিক বাংলাদেশি মোবাইল নম্বর দিন (যেমন: ০১৭XXXXXXXX)">
               </div>
               <div class="form-group">
                 <label for="seller-area-select">এলাকা</label>
