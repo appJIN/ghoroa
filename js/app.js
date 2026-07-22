@@ -216,18 +216,55 @@ const HAATS = [
 ];
 
 const AREAS = [
-  { id: 'uttara', name: 'উত্তরা', sellers: 45 },
-  { id: 'mirpur', name: 'মিরপুর', sellers: 78 },
-  { id: 'dhanmondi', name: 'ধানমন্ডি', sellers: 62 },
-  { id: 'mohammadpur', name: 'মোহাম্মদপুর', sellers: 53 },
-  { id: 'gulshan', name: 'গুলশান', sellers: 34 },
+  { id: 'adabor', name: 'আদাবর', sellers: 32 },
+  { id: 'airport', name: 'বিমানবন্দর', sellers: 18 },
+  { id: 'badda', name: 'বাড্ডা', sellers: 55 },
   { id: 'banani', name: 'বনানী', sellers: 28 },
-  { id: 'bashundhara', name: 'বসুন্ধরা', sellers: 41 },
-  { id: 'shyamoli', name: 'শ্যামলী', sellers: 36 },
-  { id: 'rampura', name: 'রামপুরা', sellers: 47 },
+  { id: 'bangshal', name: 'বংশাল', sellers: 22 },
+  { id: 'bhatara', name: 'ভাটারা', sellers: 38 },
+  { id: 'bhashantek', name: 'ভাষানটেক', sellers: 25 },
+  { id: 'cantonment', name: 'ক্যান্টনমেন্ট', sellers: 15 },
+  { id: 'chawkbazar', name: 'চকবাজার', sellers: 42 },
+  { id: 'darus-salam', name: 'দারুস সালাম', sellers: 30 },
+  { id: 'dakshinkhan', name: 'দক্ষিণখান', sellers: 35 },
+  { id: 'demra', name: 'ডেমরা', sellers: 29 },
+  { id: 'dhanmondi', name: 'ধানমন্ডি', sellers: 62 },
+  { id: 'gendaria', name: 'গেন্ডারিয়া', sellers: 27 },
+  { id: 'gulshan', name: 'গুলশান', sellers: 34 },
+  { id: 'hazaribag', name: 'হাজারীবাগ', sellers: 31 },
+  { id: 'hatirjheel', name: 'হাতিরঝিল', sellers: 20 },
   { id: 'jatrabari', name: 'যাত্রাবাড়ী', sellers: 39 },
+  { id: 'kafrul', name: 'কাফরুল', sellers: 44 },
+  { id: 'kalabagan', name: 'কলাবাগান', sellers: 26 },
+  { id: 'kamrangirchar', name: 'কামরাঙ্গীরচর', sellers: 33 },
+  { id: 'khilgaon', name: 'খিলগাঁও', sellers: 41 },
+  { id: 'khilkhet', name: 'খিলক্ষেত', sellers: 36 },
+  { id: 'kotwali', name: 'কোতোয়ালি', sellers: 19 },
+  { id: 'kadamtali', name: 'কদমতলী', sellers: 23 },
+  { id: 'lalbag', name: 'লালবাগ', sellers: 37 },
+  { id: 'mirpur', name: 'মিরপুর', sellers: 78 },
+  { id: 'mohammadpur', name: 'মোহাম্মদপুর', sellers: 53 },
   { id: 'motijheel', name: 'মতিঝিল', sellers: 25 },
-  { id: 'puran-dhaka', name: 'পুরান ঢাকা', sellers: 58 }
+  { id: 'mugda', name: 'মুগদা', sellers: 28 },
+  { id: 'newmarket', name: 'নিউ মার্কেট', sellers: 21 },
+  { id: 'pallabi', name: 'পল্লবী', sellers: 46 },
+  { id: 'paltan', name: 'পল্টন', sellers: 17 },
+  { id: 'ramna', name: 'রমনা', sellers: 24 },
+  { id: 'rampura', name: 'রামপুরা', sellers: 47 },
+  { id: 'rupnagar', name: 'রূপনগর', sellers: 33 },
+  { id: 'sabujbag', name: 'সবুজবাগ', sellers: 30 },
+  { id: 'shah-ali', name: 'শাহ আলী', sellers: 22 },
+  { id: 'shahbag', name: 'শাহবাগ', sellers: 19 },
+  { id: 'shahjahanpur', name: 'শাহজাহানপুর', sellers: 26 },
+  { id: 'sher-e-bangla', name: 'শেরেবাংলা নগর', sellers: 29 },
+  { id: 'shyampur', name: 'শ্যামপুর', sellers: 34 },
+  { id: 'sutrapur', name: 'সূত্রাপুর', sellers: 31 },
+  { id: 'tejgaon', name: 'তেজগাঁও', sellers: 38 },
+  { id: 'tejgaon-industrial', name: 'তেজগাঁও শিল্পাঞ্চল', sellers: 16 },
+  { id: 'turag', name: 'তুরাগ', sellers: 40 },
+  { id: 'uttara-east', name: 'উত্তরা পূর্ব', sellers: 45 },
+  { id: 'uttara-west', name: 'উত্তরা পশ্চিম', sellers: 37 },
+  { id: 'uttarkhan', name: 'উত্তরখান', sellers: 32 }
 ];
 
 const CATEGORIES = [
@@ -870,6 +907,17 @@ function animateCounter(el, target) {
 function initSellerForm() {
   const form = document.getElementById('seller-form');
   if (!form) return;
+
+  // Auto-populate area dropdown from AREAS data
+  const areaSelect = document.getElementById('seller-area-select');
+  if (areaSelect) {
+    AREAS.forEach(area => {
+      const option = document.createElement('option');
+      option.value = area.id;
+      option.textContent = area.name;
+      areaSelect.appendChild(option);
+    });
+  }
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
