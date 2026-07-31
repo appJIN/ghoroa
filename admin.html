@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ঘরোয়া অ্যাডমিন — ড্যাশবোর্ড</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚙️</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+  <!-- ==================== LOGIN SCREEN ==================== -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-card">
+      <div class="login-logo">🏠</div>
+      <h1>ঘরোয়া অ্যাডমিন</h1>
+      <p>অ্যাডমিন ড্যাশবোর্ডে প্রবেশ করতে Google দিয়ে লগইন করুন</p>
+      <button id="login-btn" class="btn btn-primary btn-lg">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Google দিয়ে লগইন
+      </button>
+      <p class="login-note">⚠️ শুধুমাত্র অনুমোদিত অ্যাডমিনদের জন্য</p>
+    </div>
+  </div>
+
+  <!-- ==================== ADMIN APP ==================== -->
+  <div id="admin-app" class="admin-app" style="display:none;">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-logo">🏠</span>
+        <span class="sidebar-title">ঘরোয়া</span>
+        <span class="sidebar-subtitle">অ্যাডমিন প্যানেল</span>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="nav-item active" data-tab="dashboard">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">ড্যাশবোর্ড</span>
+        </a>
+        <a class="nav-item" data-tab="products">
+          <span class="nav-icon">🛍️</span>
+          <span class="nav-label">প্রোডাক্ট</span>
+        </a>
+        <a class="nav-item" data-tab="sellers">
+          <span class="nav-icon">👥</span>
+          <span class="nav-label">সেলার</span>
+        </a>
+        <a class="nav-item" data-tab="haats">
+          <span class="nav-icon">🏪</span>
+          <span class="nav-label">হাটবার</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="index.html" class="nav-item" target="_blank">
+          <span class="nav-icon">🌐</span>
+          <span class="nav-label">সাইট দেখুন</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+      <!-- Top Header -->
+      <header class="top-header">
+        <button class="mobile-menu-toggle" id="sidebar-toggle">☰</button>
+        <h2 class="page-title" id="page-title">ড্যাশবোর্ড</h2>
+        <div class="header-right">
+          <div class="user-info">
+            <img id="user-avatar" src="" alt="User" class="user-avatar">
+            <span id="user-name" class="user-name"></span>
+          </div>
+          <button id="logout-btn" class="btn btn-outline btn-sm">লগআউট</button>
+        </div>
+      </header>
+
+      <!-- ==================== DASHBOARD TAB ==================== -->
+      <div class="tab-content active" data-tab="dashboard">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">🛍️</div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-products">0</span>
+              <span class="stat-label">মোট প্রোডাক্ট</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-sellers">0</span>
+              <span class="stat-label">মোট সেলার</span>
+            </div>
+          </div>
+          <div class="stat-card stat-card-warning">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-pending">0</span>
+              <span class="stat-label">অনুমোদন বাকি</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📍</div>
+            <div class="stat-info">
+              <span class="stat-value" id="stat-areas">49</span>
+              <span class="stat-label">এলাকা</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>📋 সাম্প্রতিক কার্যক্রম</h3>
+          </div>
+          <div class="card-body" id="recent-activity">
+            <div class="empty-state">
+              <p>🚀 ড্যাশবোর্ডে স্বাগতম! প্রোডাক্ট যোগ করে শুরু করুন।</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== PRODUCTS TAB ==================== -->
+      <div class="tab-content" data-tab="products">
+        <div class="tab-header">
+          <div class="search-box">
+            <input type="text" id="products-search" placeholder="🔍 প্রোডাক্ট খুঁজুন...">
+          </div>
+          <button id="add-product-btn" class="btn btn-primary">
+            ➕ নতুন প্রোডাক্ট
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ছবি</th>
+                  <th>নাম</th>
+                  <th>দাম</th>
+                  <th>ক্যাটাগরি</th>
+                  <th>সেলার</th>
+                  <th>এলাকা</th>
+                  <th>ফিচার্ড</th>
+                  <th>অ্যাকশন</th>
+                </tr>
+              </thead>
+              <tbody id="products-table-body">
+                <tr>
+                  <td colspan="8" class="empty-state">লোড হচ্ছে...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SELLERS TAB ==================== -->
+      <div class="tab-content" data-tab="sellers">
+        <div class="tab-header">
+          <h3>👥 সেলার তালিকা</h3>
+        </div>
+
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>নাম</th>
+                  <th>মোবাইল</th>
+                  <th>এলাকা</th>
+                  <th>ক্যাটাগরি</th>
+                  <th>স্ট্যাটাস</th>
+                  <th>তারিখ</th>
+                  <th>অ্যাকশন</th>
+                </tr>
+              </thead>
+              <tbody id="sellers-table-body">
+                <tr>
+                  <td colspan="7" class="empty-state">কোনো সেলার রেজিস্ট্রেশন আসেনি</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== HAATS TAB ==================== -->
+      <div class="tab-content" data-tab="haats">
+        <div class="tab-header">
+          <h3>🏪 হাটবার ম্যানেজমেন্ট</h3>
+          <button id="add-haat-btn" class="btn btn-primary">➕ নতুন হাটবার</button>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="empty-state">
+              <p>🏪 হাটবার ম্যানেজমেন্ট শীঘ্রই আসছে...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ==================== PRODUCT MODAL ==================== -->
+  <div id="product-modal" class="modal-overlay" style="display:none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">নতুন প্রোডাক্ট যোগ করুন</h3>
+        <button id="close-modal-btn" class="modal-close">&times;</button>
+      </div>
+      <form id="product-form" class="modal-body">
+        <input type="hidden" id="product-id">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="product-name">প্রোডাক্টের নাম *</label>
+            <input type="text" id="product-name" required placeholder="যেমন: নানির আমের আচার">
+          </div>
+          <div class="form-group">
+            <label for="product-price">দাম (৳) *</label>
+            <input type="number" id="product-price" required placeholder="350">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="product-category">ক্যাটাগরি *</label>
+            <select id="product-category" required>
+              <option value="">সিলেক্ট করুন</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="product-area">এলাকা *</label>
+            <select id="product-area" required>
+              <option value="">সিলেক্ট করুন</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="product-seller">সেলারের নাম *</label>
+            <input type="text" id="product-seller" required placeholder="ফাতেমা বেগম">
+          </div>
+          <div class="form-group">
+            <label for="product-badge">ব্যাজ</label>
+            <select id="product-badge">
+              <option value="">কোনো ব্যাজ নেই</option>
+              <option value="বেস্ট সেলার">🏆 বেস্ট সেলার</option>
+              <option value="নতুন">🆕 নতুন</option>
+              <option value="জনপ্রিয়">🔥 জনপ্রিয়</option>
+              <option value="সীমিত">⏰ সীমিত</option>
+              <option value="অর্গানিক">🌿 অর্গানিক</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="product-story">গল্প / বর্ণনা *</label>
+          <textarea id="product-story" required rows="3" placeholder="এই প্রোডাক্টের পেছনের গল্প লিখুন..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>প্রোডাক্ট ছবি</label>
+          <div class="image-upload-zone" id="image-upload-zone">
+            <input type="file" id="product-image-upload" accept="image/*" hidden>
+            <img id="image-preview" src="" alt="" style="display:none;">
+            <div class="upload-placeholder" id="upload-placeholder">
+              <span class="upload-icon">📸</span>
+              <p>ছবি আপলোড করতে ক্লিক করুন বা ড্র্যাগ করুন</p>
+              <small>JPG, PNG — সর্বোচ্চ ৫ MB</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="product-featured">
+            <span>✨ ফিচার্ড প্রোডাক্ট হিসেবে দেখান</span>
+          </label>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancel-btn" class="btn btn-outline">বাতিল</button>
+          <button type="submit" class="btn btn-primary" id="save-btn">
+            <span id="save-btn-text">সেভ করুন</span>
+            <span id="save-btn-loading" style="display:none;">⏳ সেভ হচ্ছে...</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <span id="toast-message"></span>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="loading-overlay" style="display:none;">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
