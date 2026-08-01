@@ -72,7 +72,8 @@ ul {
 }
 
 /* Layout */
-.admin-layout {
+.admin-layout,
+.admin-app {
   display: flex;
   min-height: 100vh;
 }

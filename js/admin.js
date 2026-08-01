@@ -66,7 +66,7 @@ function initAuth() {
             if (user.email === ADMIN_EMAIL) {
                 // Admin is authenticated
                 if (loginScreen) loginScreen.style.display = 'none';
-                if (adminApp) adminApp.style.display = 'block';
+                if (adminApp) adminApp.style.display = 'flex';
                 
                 const userNameEl = document.getElementById('user-name');
                 const userAvatarEl = document.getElementById('user-avatar');
@@ -368,7 +368,11 @@ function openAddProductModal() {
     }
     
     currentImageFile = null;
-    document.getElementById('product-modal').style.display = 'flex';
+    const modal = document.getElementById('product-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('active');
+    }
 }
 
 /**
@@ -406,7 +410,11 @@ function openEditProductModal(productId) {
     }
     
     currentImageFile = null;
-    document.getElementById('product-modal').style.display = 'flex';
+    const editModal = document.getElementById('product-modal');
+    if (editModal) {
+        editModal.style.display = 'flex';
+        editModal.classList.add('active');
+    }
 }
 
 /**
@@ -414,7 +422,10 @@ function openEditProductModal(productId) {
  */
 function closeModal() {
     const modal = document.getElementById('product-modal');
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => { modal.style.display = 'none'; }, 300);
+    }
 }
 
 /**
