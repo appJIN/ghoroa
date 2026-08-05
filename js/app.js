@@ -59,7 +59,7 @@ function showToast(message) {
 
 // ==================== DATA ====================
 
-const PRODUCTS = [
+let PRODUCTS = [
   {
     id: 1,
     name: 'নানির আমের আচার',
@@ -182,7 +182,7 @@ const PRODUCTS = [
   }
 ];
 
-const HAATS = [
+let HAATS = [
   {
     id: 1,
     title: 'পিঠা উৎসব',
@@ -325,13 +325,16 @@ let searchQuery = '';
 
 // ==================== INITIALIZATION ====================
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initTheme();
   initMobileMenu();
   initSmoothScroll();
   initScrollAnimations();
   initNavbarScroll();
   initSearch();
+
+  // Load data from Firebase first, fallback to hardcoded
+  await loadFirebaseData();
 
   renderCategories();
   renderAreas();
@@ -346,6 +349,68 @@ document.addEventListener('DOMContentLoaded', () => {
   initSellerForm();
   initModalEvents();
 });
+
+// ==================== FIREBASE DATA LOADING ====================
+
+async function loadFirebaseData() {
+  // Check if Firebase is available
+  if (typeof db === 'undefined') return;
+
+  try {
+    // Load products from Firestore
+    const productsSnap = await db.collection('products')
+      .where('approved', '!=', false)
+      .get();
+
+    if (!productsSnap.empty) {
+      const firebaseProducts = [];
+      productsSnap.forEach(doc => {
+        const data = doc.data();
+        firebaseProducts.push({
+          id: doc.id,
+          name: data.name || '',
+          price: data.price || 0,
+          category: data.category || '',
+          area: data.area || '',
+          areaName: data.areaName || data.area || '',
+          seller: data.sellerName || data.seller || '',
+          rating: data.rating || 4.5,
+          reviews: data.reviews || 0,
+          image: data.imageUrl || data.image || 'assets/achar.jpg',
+          story: data.story || '',
+          badge: data.badge || '',
+          featured: data.featured || false
+        });
+      });
+      // Merge: Firebase products first, then hardcoded
+      PRODUCTS = [...firebaseProducts, ...PRODUCTS];
+    }
+
+    // Load haats from Firestore
+    const haatsSnap = await db.collection('haats').get();
+    if (!haatsSnap.empty) {
+      const firebaseHaats = [];
+      haatsSnap.forEach(doc => {
+        const data = doc.data();
+        firebaseHaats.push({
+          id: doc.id,
+          title: data.title || '',
+          seller: data.seller || '',
+          area: data.area || '',
+          description: data.description || '',
+          date: data.date ? data.date.toDate() : new Date(),
+          products: data.products || 0,
+          isLive: data.isLive || false
+        });
+      });
+      HAATS = [...firebaseHaats, ...HAATS];
+    }
+
+    console.log(`✅ Firebase: ${productsSnap.size} products loaded`);
+  } catch (error) {
+    console.warn('Firebase load failed, using hardcoded data:', error.message);
+  }
+}
 
 // ==================== THEME ====================
 
@@ -496,10 +561,10 @@ function renderProducts() {
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
     filtered = filtered.filter(p =>
-      p.name.toLowerCase().includes(q) ||
-      p.seller.toLowerCase().includes(q) ||
-      p.areaName.includes(q) ||
-      p.story.toLowerCase().includes(q)
+      (p.name || '').toLowerCase().includes(q) ||
+      (p.seller || '').toLowerCase().includes(q) ||
+      (p.areaName || '').includes(q) ||
+      (p.story || '').toLowerCase().includes(q)
     );
   }
 
@@ -515,7 +580,7 @@ function renderProducts() {
   }
 
   grid.innerHTML = filtered.map(p => `
-    <div class="product-card glass animate-on-scroll" onclick="openProductModal(${p.id})">
+    <div class="product-card glass animate-on-scroll" onclick="openProductModal('${p.id}')">
       <div class="product-image">
         <img src="${p.image}" alt="${p.name}" loading="lazy">
         ${p.badge ? `<span class="product-badge">${p.badge}</span>` : ''}
@@ -526,7 +591,7 @@ function renderProducts() {
       <div class="product-info">
         <h3 class="product-name">${p.name}</h3>
         <p class="product-seller">🏪 ${p.seller} · 📍 ${p.areaName}</p>
-        <p class="product-story-snippet">${p.story.substring(0, 60)}...</p>
+        <p class="product-story-snippet">${(p.story || '').substring(0, 60)}...</p>
         <div class="product-footer">
           <span class="product-price">${formatPrice(p.price)}</span>
           <span class="product-rating">
@@ -777,7 +842,7 @@ function initModalEvents() {
 }
 
 function openProductModal(productId) {
-  const product = PRODUCTS.find(p => p.id === productId);
+  const product = PRODUCTS.find(p => String(p.id) === String(productId));
   if (!product) return;
 
   const modal = document.getElementById('product-modal');
