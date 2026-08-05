@@ -367,19 +367,20 @@ async function loadFirebaseData() {
         firebaseProducts.push({
           id: doc.id,
           name: data.name || '',
-          price: data.price || 0,
+          price: parseInt(data.price) || 0,
           category: data.category || '',
-          area: data.area || '',
+          area: (data.area || '').toLowerCase(),
           areaName: data.areaName || data.area || '',
           seller: data.sellerName || data.seller || '',
-          rating: data.rating || 4.5,
-          reviews: data.reviews || 0,
+          rating: parseFloat(data.rating) || 4.5,
+          reviews: parseInt(data.reviews) || 0,
           image: data.imageUrl || data.image || 'assets/achar.jpg',
           story: data.story || '',
           badge: data.badge || '',
           featured: data.featured || false
         });
       });
+      console.log('🔥 Firebase products:', firebaseProducts);
       // Merge: Firebase products first, then hardcoded
       PRODUCTS = [...firebaseProducts, ...PRODUCTS];
     }
