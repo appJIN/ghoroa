@@ -1,0 +1,67 @@
+/* Seller Panel - Additional styles (extends admin.css) */
+
+.seller-reg-form .form-group {
+  margin-bottom: 1.25rem;
+}
+
+.seller-reg-form label {
+  display: block;
+  margin-bottom: 0.4rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.seller-reg-form .form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: var(--transition);
+}
+
+.seller-reg-form .form-control:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-badge.approved {
+  background-color: rgba(46, 204, 113, 0.15);
+  color: var(--success);
+}
+
+.status-badge.pending {
+  background-color: rgba(243, 156, 18, 0.15);
+  color: var(--warning);
+}
+
+.status-badge.rejected {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: var(--danger);
+}
+
+.login-error {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: rgba(231, 76, 60, 0.1);
+  border: 1px solid var(--danger);
+  border-radius: var(--radius-md);
+  color: var(--danger);
+  font-size: 0.9rem;
+}
+
+.content-area {
+  padding: 1.5rem;
+}
