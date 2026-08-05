@@ -358,9 +358,7 @@ async function loadFirebaseData() {
 
   try {
     // Load products from Firestore
-    const productsSnap = await db.collection('products')
-      .where('approved', '!=', false)
-      .get();
+    const productsSnap = await db.collection('products').get();
 
     if (!productsSnap.empty) {
       const firebaseProducts = [];

@@ -14,10 +14,10 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Firebase services
+// Firebase services (conditional - only init if SDK loaded)
 const db = firebase.firestore();
-const auth = firebase.auth();
-const storage = firebase.storage();
+const auth = firebase.auth ? firebase.auth() : null;
+const storage = firebase.storage ? firebase.storage() : null;
 
 // Admin email
 const ADMIN_EMAIL = "dr.johir@gmail.com";
