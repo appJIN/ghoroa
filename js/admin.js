@@ -139,8 +139,13 @@ function setupEventListeners() {
     document.getElementById('cancel-btn')?.addEventListener('click', closeModal);
     document.getElementById('product-form')?.addEventListener('submit', saveProduct);
     
-    // Image Upload Preview
-    document.getElementById('product-image-upload')?.addEventListener('change', handleImageSelection);
+    // Image Upload - click zone triggers file input
+    const uploadZone = document.getElementById('image-upload-zone');
+    const fileInput = document.getElementById('product-image-upload');
+    if (uploadZone && fileInput) {
+        uploadZone.addEventListener('click', () => fileInput.click());
+    }
+    fileInput?.addEventListener('change', handleImageSelection);
     
     // Search Products
     document.getElementById('products-search')?.addEventListener('input', (e) => {
