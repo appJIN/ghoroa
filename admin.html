@@ -199,10 +199,23 @@
           <button id="add-haat-btn" class="btn btn-primary">➕ নতুন হাটবার</button>
         </div>
         <div class="card">
-          <div class="card-body">
-            <div class="empty-state">
-              <p>🏪 হাটবার ম্যানেজমেন্ট শীঘ্রই আসছে...</p>
-            </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>শিরোনাম</th>
+                  <th>সেলার</th>
+                  <th>এলাকা</th>
+                  <th>তারিখ</th>
+                  <th>পণ্য সংখ্যা</th>
+                  <th>স্ট্যাটাস</th>
+                  <th>অ্যাকশন</th>
+                </tr>
+              </thead>
+              <tbody id="haats-table-body">
+                <tr><td colspan="7" class="text-center py-4">কোনো হাটবার পাওয়া যায়নি</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -297,6 +310,63 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+  <!-- ==================== HAAT MODAL ==================== -->
+  <div id="haat-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="haat-modal-title">নতুন হাটবার যোগ করুন</h3>
+        <button id="close-haat-modal-btn" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="haat-form">
+          <input type="hidden" id="haat-id">
+          <div class="form-row">
+            <div class="form-group">
+              <label>হাটবারের শিরোনাম *</label>
+              <input type="text" id="haat-title" class="form-control" placeholder="যেমন: পিঠা উৎসব" required>
+            </div>
+            <div class="form-group">
+              <label>সেলার নাম *</label>
+              <input type="text" id="haat-seller" class="form-control" placeholder="সেলারের নাম" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>এলাকা *</label>
+              <select id="haat-area" class="form-control" required>
+                <option value="">নির্বাচন করুন</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>তারিখ *</label>
+              <input type="date" id="haat-date" class="form-control" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>পণ্য সংখ্যা</label>
+              <input type="number" id="haat-products-count" class="form-control" value="0" min="0">
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="haat-is-live">
+                <span>🔴 লাইভ হাটবার</span>
+              </label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>বিবরণ *</label>
+            <textarea id="haat-description" class="form-control" rows="3" placeholder="হাটবারের বিবরণ লিখুন..." required></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" id="cancel-haat-btn" class="btn btn-outline">বাতিল</button>
+            <button type="submit" class="btn btn-primary">💾 সেভ করুন</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 

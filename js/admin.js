@@ -151,6 +151,12 @@ function setupEventListeners() {
     document.getElementById('products-search')?.addEventListener('input', (e) => {
         searchProducts(e.target.value);
     });
+
+    // Haat Modal & Form
+    document.getElementById('add-haat-btn')?.addEventListener('click', openAddHaatModal);
+    document.getElementById('close-haat-modal-btn')?.addEventListener('click', closeHaatModal);
+    document.getElementById('cancel-haat-btn')?.addEventListener('click', closeHaatModal);
+    document.getElementById('haat-form')?.addEventListener('submit', saveHaat);
 }
 
 /**
@@ -168,14 +174,17 @@ function populateSelects() {
     }
 
     const areaSelect = document.getElementById('product-area');
-    if (areaSelect) {
-        DMP_AREAS.forEach(area => {
-            const option = document.createElement('option');
-            option.value = area;
-            option.textContent = area;
-            areaSelect.appendChild(option);
-        });
-    }
+    const haatAreaSelect = document.getElementById('haat-area');
+    [areaSelect, haatAreaSelect].forEach(select => {
+        if (select) {
+            DMP_AREAS.forEach(area => {
+                const option = document.createElement('option');
+                option.value = area;
+                option.textContent = area;
+                select.appendChild(option);
+            });
+        }
+    });
 }
 
 /**
@@ -200,9 +209,10 @@ function switchTab(tabName) {
     });
 
     // Load necessary data when switching tabs
-    if (tabName === 'dashboard') loadDashboardStats();
+    if (tabName === 'dashboard') { loadDashboardStats(); loadRecentActivity(); }
     if (tabName === 'products') loadProducts();
     if (tabName === 'sellers') loadSellers();
+    if (tabName === 'haats') loadHaats();
 }
 
 /**
@@ -734,7 +744,6 @@ function formatDate(timestamp) {
     if (!timestamp) return 'N/A';
     
     let date;
-    // Check if it's a Firestore Timestamp with toDate() method
     if (timestamp.toDate && typeof timestamp.toDate === 'function') {
         date = timestamp.toDate();
     } else {
@@ -746,7 +755,210 @@ function formatDate(timestamp) {
     try {
         return new Intl.DateTimeFormat('bn-BD', options).format(date);
     } catch (e) {
-        // Fallback for environments lacking 'bn-BD' locale support
         return date.toLocaleDateString();
+    }
+}
+
+// ==========================================
+// Recent Activity
+// ==========================================
+
+async function loadRecentActivity() {
+    const container = document.getElementById('recent-activity');
+    if (!container) return;
+
+    try {
+        const snapshot = await db.collection('products')
+            .orderBy('createdAt', 'desc')
+            .limit(5)
+            .get();
+
+        if (snapshot.empty) {
+            container.innerHTML = '<div class="empty-state"><p>🚀 ড্যাশবোর্ডে স্বাগতম! প্রোডাক্ট যোগ করে শুরু করুন।</p></div>';
+            return;
+        }
+
+        let html = '<ul style="list-style:none;padding:0;">';
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const date = formatDate(data.createdAt);
+            html += `<li style="padding:0.75rem 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.75rem;">
+                <span style="font-size:1.5rem;">📦</span>
+                <div>
+                    <strong>${data.name || 'Unnamed'}</strong> — ৳${data.price || 0}
+                    <br><small style="color:var(--text-muted);">🏪 ${data.sellerName || 'Unknown'} · ${date}</small>
+                </div>
+            </li>`;
+        });
+        html += '</ul>';
+        container.innerHTML = html;
+    } catch (error) {
+        console.error('Error loading recent activity:', error);
+        container.innerHTML = '<div class="empty-state"><p>কার্যক্রম লোড করতে সমস্যা</p></div>';
+    }
+}
+
+// ==========================================
+// Haats CRUD
+// ==========================================
+
+let allHaats = [];
+
+async function loadHaats() {
+    const tbody = document.getElementById('haats-table-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">লোড হচ্ছে...</td></tr>';
+
+    try {
+        const snapshot = await db.collection('haats').orderBy('createdAt', 'desc').get();
+        allHaats = [];
+        snapshot.forEach(doc => {
+            allHaats.push({ id: doc.id, ...doc.data() });
+        });
+        renderHaatsTable(allHaats);
+    } catch (error) {
+        console.error('Error loading haats:', error);
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">হাটবার লোড করতে ব্যর্থ</td></tr>';
+    }
+}
+
+function renderHaatsTable(haats) {
+    const tbody = document.getElementById('haats-table-body');
+    if (!tbody) return;
+
+    if (haats.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">কোনো হাটবার পাওয়া যায়নি</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = '';
+    haats.forEach(haat => {
+        const tr = document.createElement('tr');
+        const statusClass = haat.isLive ? 'color:var(--success);' : 'color:var(--text-muted);';
+        const statusText = haat.isLive ? '🟢 লাইভ' : '⚪ বন্ধ';
+        tr.innerHTML = `
+            <td><strong>${haat.title || ''}</strong></td>
+            <td>${haat.seller || ''}</td>
+            <td>${haat.area || ''}</td>
+            <td>${formatDate(haat.date || haat.createdAt)}</td>
+            <td>${haat.products || 0}টি</td>
+            <td><span style="${statusClass}">${statusText}</span></td>
+            <td>
+                <button class="btn btn-sm btn-outline" onclick="openEditHaatModal('${haat.id}')">
+                    ✏️ এডিট
+                </button>
+                <button class="btn btn-sm btn-outline" style="color:var(--danger);border-color:var(--danger);" onclick="deleteHaat('${haat.id}')">
+                    🗑️ ডিলিট
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function openAddHaatModal() {
+    const form = document.getElementById('haat-form');
+    if (form) form.reset();
+    document.getElementById('haat-id').value = '';
+    document.getElementById('haat-modal-title').textContent = 'নতুন হাটবার যোগ করুন';
+
+    const modal = document.getElementById('haat-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('active');
+    }
+}
+
+function openEditHaatModal(haatId) {
+    const haat = allHaats.find(h => h.id === haatId);
+    if (!haat) return;
+
+    document.getElementById('haat-id').value = haat.id;
+    document.getElementById('haat-modal-title').textContent = 'হাটবার এডিট করুন';
+    document.getElementById('haat-title').value = haat.title || '';
+    document.getElementById('haat-seller').value = haat.seller || '';
+    document.getElementById('haat-area').value = haat.area || '';
+    document.getElementById('haat-description').value = haat.description || '';
+    document.getElementById('haat-products-count').value = haat.products || 0;
+    document.getElementById('haat-is-live').checked = haat.isLive || false;
+
+    // Set date
+    if (haat.date) {
+        let d = haat.date.toDate ? haat.date.toDate() : new Date(haat.date);
+        document.getElementById('haat-date').value = d.toISOString().split('T')[0];
+    }
+
+    const modal = document.getElementById('haat-modal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('active');
+    }
+}
+
+function closeHaatModal() {
+    const modal = document.getElementById('haat-modal');
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => { modal.style.display = 'none'; }, 300);
+    }
+}
+
+async function saveHaat(e) {
+    e.preventDefault();
+
+    const haatId = document.getElementById('haat-id').value;
+    const title = document.getElementById('haat-title').value.trim();
+    const seller = document.getElementById('haat-seller').value.trim();
+    const area = document.getElementById('haat-area').value;
+    const description = document.getElementById('haat-description').value.trim();
+    const dateStr = document.getElementById('haat-date').value;
+    const productsCount = parseInt(document.getElementById('haat-products-count').value) || 0;
+    const isLive = document.getElementById('haat-is-live').checked;
+
+    if (!title || !seller || !area || !description || !dateStr) {
+        showToast('সব ফিল্ড পূরণ করুন', 'error');
+        return;
+    }
+
+    try {
+        const haatData = {
+            title,
+            seller,
+            area,
+            description,
+            date: firebase.firestore.Timestamp.fromDate(new Date(dateStr)),
+            products: productsCount,
+            isLive,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        if (haatId) {
+            await db.collection('haats').doc(haatId).update(haatData);
+            showToast('হাটবার আপডেট হয়েছে! ✅', 'success');
+        } else {
+            haatData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+            await db.collection('haats').add(haatData);
+            showToast('নতুন হাটবার যোগ হয়েছে! 🎉', 'success');
+        }
+
+        closeHaatModal();
+        loadHaats();
+    } catch (error) {
+        console.error('Error saving haat:', error);
+        showToast('হাটবার সেভ করতে সমস্যা', 'error');
+    }
+}
+
+async function deleteHaat(haatId) {
+    if (!confirm('আপনি কি এই হাটবার ডিলিট করতে চান?')) return;
+
+    try {
+        await db.collection('haats').doc(haatId).delete();
+        showToast('হাটবার ডিলিট হয়েছে', 'success');
+        loadHaats();
+    } catch (error) {
+        console.error('Error deleting haat:', error);
+        showToast('ডিলিট করতে সমস্যা', 'error');
     }
 }
