@@ -332,6 +332,9 @@ function renderProductsTable(products) {
                     <button class="btn btn-sm btn-outline-primary" onclick="openEditProductModal('${product.id}')" title="এডিট">
                         <i class="bi bi-pencil"></i> এডিট
                     </button>
+                    <button class="btn btn-sm btn-outline-info" onclick="generateProductQR('${product.id}', '${(product.name || 'Unnamed').replace(/'/g, "\\'")}')" title="QR Code">
+                        <i class="bi bi-qr-code"></i> QR
+                    </button>
                     <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct('${product.id}')" title="ডিলিট">
                         <i class="bi bi-trash"></i> ডিলিট
                     </button>
@@ -503,6 +506,7 @@ async function saveProduct(e) {
             category,
             area,
             sellerName: seller,
+            sellerPhone: '',
             story,
             badge,
             featured,
@@ -1019,4 +1023,14 @@ async function toggleHaatLive(haatId, isLive) {
         console.error('Error toggling haat:', error);
         showToast('স্ট্যাটাস পরিবর্তন করতে সমস্যা', 'error');
     }
+}
+
+function generateProductQR(productId, productName) {
+    const url = `https://ghoroa.shop/#product-${productId}`;
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+    modal.innerHTML = `<div style="background:white;padding:2rem;border-radius:12px;text-align:center;max-width:350px;"><h3 style="color:#333;margin-bottom:1rem;">${productName}</h3><canvas id="qr-canvas"></canvas><p style="color:#666;margin:1rem 0;font-size:0.85rem;">${url}</p><button onclick="this.closest('div').parentElement.remove()" style="padding:0.5rem 2rem;background:#2ecc71;color:white;border:none;border-radius:6px;cursor:pointer;">বন্ধ করুন</button></div>`;
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+    QRCode.toCanvas(document.getElementById('qr-canvas'), url, { width: 200, margin: 2 }, (error) => { if (error) console.error(error); });
 }

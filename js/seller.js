@@ -408,6 +408,7 @@ async function saveProduct(e) {
       areaName: sellerProfile.area || '',
       seller: currentUser.uid,
       sellerName: sellerProfile.name || currentUser.displayName || '',
+      sellerPhone: sellerProfile.phone || '',
       shopName: sellerProfile.shopName || '',
       story,
       badge,

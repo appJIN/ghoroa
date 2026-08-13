@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>বিক্রেতার প্রোফাইল - ঘরোয়া</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #121212;
+      --surface: #1e1e1e;
+      --primary: #bb86fc;
+      --primary-variant: #3700b3;
+      --secondary: #03dac6;
+      --text: #ffffff;
+      --text-muted: #b3b3b3;
+      --border: #333333;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Hind Siliguri', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    /* Header Profile */
+    .seller-header {
+      background-color: var(--surface);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .seller-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background-color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+
+    .seller-name {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .seller-meta {
+      display: flex;
+      gap: 1rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+
+    .seller-meta span {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .seller-story {
+      max-width: 800px;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    /* Products Grid */
+    .products-header {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .product-card {
+      background-color: var(--surface);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      transition: transform 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      background-color: #333;
+    }
+
+    .product-info {
+      padding: 1.5rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .product-price {
+      color: var(--primary);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .product-snippet {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-top: auto;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .loading-spinner {
+      text-align: center;
+      padding: 4rem;
+      font-size: 1.2rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container" id="app">
+    <div id="loading" class="loading-spinner">তথ্য লোড হচ্ছে...</div>
+    <div id="content" style="display: none;">
+      
+      <!-- Seller Profile Header -->
+      <div class="seller-header">
+        <div class="seller-avatar">👩🏽‍🍳</div>
+        <h1 class="seller-name" id="seller-name">লোড হচ্ছে...</h1>
+        <div class="seller-meta">
+          <span>🏪 <span id="shop-name">-</span></span>
+          <span>📍 <span id="seller-area">-</span></span>
+        </div>
+        <p class="seller-story" id="seller-story"></p>
+      </div>
+
+      <!-- Products -->
+      <h2 class="products-header">সকল পণ্য</h2>
+      <div class="products-grid" id="products-grid">
+        <!-- Products will be injected here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const sellerId = window.location.hash.substring(1);
+      const loading = document.getElementById('loading');
+      const content = document.getElementById('content');
+      
+      if (!sellerId) {
+        loading.innerHTML = "❌ কোনো বিক্রেতার আইডি পাওয়া যায়নি।";
+        return;
+      }
+
+      try {
+        // Load seller info
+        const sellerDoc = await db.collection('sellers').doc(sellerId).get();
+        if (!sellerDoc.exists) {
+          loading.innerHTML = "❌ বিক্রেতাকে খুঁজে পাওয়া যায়নি।";
+          return;
+        }
+
+        const seller = sellerDoc.data();
+        document.getElementById('seller-name').textContent = seller.name || 'নাম নেই';
+        document.getElementById('shop-name').textContent = seller.shopName || seller.name || 'দোকান';
+        document.getElementById('seller-area').textContent = seller.area || 'অজানা এলাকা';
+        document.getElementById('seller-story').textContent = seller.story || seller.description || '';
+
+        // Load products
+        const productsSnap = await db.collection('products').where('seller', '==', sellerId).get();
+        const grid = document.getElementById('products-grid');
+        
+        if (productsSnap.empty) {
+          grid.innerHTML = '<p style="color:var(--text-muted);grid-column:1/-1;text-align:center;">এই বিক্রেতার কোনো পণ্য নেই।</p>';
+        } else {
+          grid.innerHTML = '';
+          productsSnap.forEach(doc => {
+            const p = doc.data();
+            const imgUrl = p.imageUrl || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23333"/><text x="50" y="50" dominant-baseline="middle" text-anchor="middle" font-size="20" fill="%23fff">No Image</text></svg>';
+            
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+              <img src="${imgUrl}" alt="${p.name}" class="product-image">
+              <div class="product-info">
+                <div class="product-name">${p.name || 'নামহীন পণ্য'}</div>
+                <div class="product-price">৳${p.price || 0}</div>
+                <div class="product-snippet">${p.story || p.description || ''}</div>
+              </div>
+            `;
+            grid.appendChild(card);
+          });
+        }
+
+        // Show content
+        loading.style.display = 'none';
+        content.style.display = 'block';
+
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        loading.innerHTML = "❌ তথ্য লোড করতে সমস্যা হয়েছে।";
+      }
+    });
+  </script>
+</body>
+</html>

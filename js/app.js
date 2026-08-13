@@ -372,6 +372,8 @@ async function loadFirebaseData() {
           area: (data.area || '').toLowerCase(),
           areaName: data.areaName || data.area || '',
           seller: data.sellerName || data.seller || '',
+          sellerId: data.seller || '',
+          sellerPhone: data.sellerPhone || '',
           rating: parseFloat(data.rating) || 4.5,
           reviews: parseInt(data.reviews) || 0,
           image: data.imageUrl || data.image || 'assets/achar.jpg',
@@ -380,13 +382,15 @@ async function loadFirebaseData() {
           featured: data.featured || false
         });
       });
-      console.log('🔥 Firebase products:', firebaseProducts);
-      // Merge: Firebase products first, then hardcoded
+      console.log('🔥 Firebase products:', firebaseProducts.length);
+      // Firebase products replace hardcoded data
       PRODUCTS = [...firebaseProducts, ...PRODUCTS];
     }
 
-    // Load haats from Firestore
-    const haatsSnap = await db.collection('haats').get();
+    // Load only approved haats from Firestore
+    const haatsSnap = await db.collection('haats')
+      .where('approved', '==', true)
+      .get();
     if (!haatsSnap.empty) {
       const firebaseHaats = [];
       haatsSnap.forEach(doc => {
@@ -402,10 +406,11 @@ async function loadFirebaseData() {
           isLive: data.isLive || false
         });
       });
+      // Approved Firebase haats replace hardcoded
       HAATS = [...firebaseHaats, ...HAATS];
     }
 
-    console.log(`✅ Firebase: ${productsSnap.size} products loaded`);
+    console.log(`✅ Firebase: ${productsSnap.size} products, haats loaded`);
   } catch (error) {
     console.warn('Firebase load failed, using hardcoded data:', error.message);
   }
@@ -859,10 +864,28 @@ function openProductModal(productId) {
   document.getElementById('seller-area').textContent = `📍 ${product.areaName}`;
   document.getElementById('seller-avatar').textContent = product.seller.charAt(0);
 
-  // WhatsApp link
+  // WhatsApp link - use seller's phone if available
   const waMsg = encodeURIComponent(`হ্যালো, আমি ঘরোয়া থেকে "${product.name}" পণ্যটি কিনতে চাই। মূল্য: ${formatPrice(product.price)}`);
-  document.getElementById('modal-whatsapp').href = `https://wa.me/8801XXXXXXXXX?text=${waMsg}`;
+  let sellerPhone = product.sellerPhone || '';
+  if (sellerPhone && !sellerPhone.startsWith('88')) {
+    sellerPhone = '88' + sellerPhone;
+  }
+  const waLink = sellerPhone 
+    ? `https://wa.me/${sellerPhone}?text=${waMsg}` 
+    : `https://wa.me/?text=${waMsg}`;
+  document.getElementById('modal-whatsapp').href = waLink;
   document.getElementById('modal-messenger').href = `https://m.me/ghoroa.bd`;
+
+  // If no phone, try to look up from sellers collection
+  if (!sellerPhone && product.sellerId && typeof db !== 'undefined') {
+    db.collection('sellers').doc(product.sellerId).get().then(doc => {
+      if (doc.exists && doc.data().phone) {
+        let phone = doc.data().phone;
+        if (!phone.startsWith('88')) phone = '88' + phone;
+        document.getElementById('modal-whatsapp').href = `https://wa.me/${phone}?text=${waMsg}`;
+      }
+    }).catch(() => {});
+  }
 
   // Show modal
   modal.classList.add('active');

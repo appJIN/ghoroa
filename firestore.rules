@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Admin email
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'dr.johir@gmail.com';
+    }
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Products: Anyone reads, auth users create, owner/admin update/delete
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin() || 
+        (isAuthenticated() && resource.data.seller == request.auth.uid);
+    }
+
+    // Sellers: Anyone reads, auth users create own, owner/admin update/delete
+    match /sellers/{sellerId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && request.auth.uid == sellerId;
+      allow update: if isAdmin() || 
+        (isAuthenticated() && request.auth.uid == sellerId);
+      allow delete: if isAdmin();
+    }
+
+    // Haats: Anyone reads, auth users create, owner/admin update/delete
+    match /haats/{haatId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin() || 
+        (isAuthenticated() && resource.data.sellerId == request.auth.uid);
+    }
+  }
+}
