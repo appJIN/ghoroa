@@ -201,7 +201,8 @@ function switchTab(tabName) {
   const titles = {
     'dashboard': 'ড্যাশবোর্ড',
     'my-products': 'আমার প্রোডাক্ট',
-    'my-shop': 'দোকান সেটিংস'
+    'my-shop': 'দোকান সেটিংস',
+    'my-haats': 'আমার হাটবার'
   };
   const titleEl = document.getElementById('page-title');
   if (titleEl) titleEl.textContent = titles[tabName] || 'ড্যাশবোর্ড';
@@ -209,6 +210,7 @@ function switchTab(tabName) {
   // Load data
   if (tabName === 'dashboard') loadDashboardStats();
   if (tabName === 'my-products') loadMyProducts();
+  if (tabName === 'my-haats') loadMyHaats();
 }
 
 // ==========================================
@@ -575,6 +577,12 @@ function setupEventListeners() {
   // Shop settings
   document.getElementById('shop-settings-form')?.addEventListener('submit', saveShopSettings);
 
+  // Haat modal
+  document.getElementById('add-haat-btn')?.addEventListener('click', openAddHaatModal);
+  document.getElementById('close-haat-modal-btn')?.addEventListener('click', closeHaatModal);
+  document.getElementById('cancel-haat-btn')?.addEventListener('click', closeHaatModal);
+  document.getElementById('haat-form')?.addEventListener('submit', saveMyHaat);
+
   // Mobile menu toggle
   document.getElementById('menu-toggle')?.addEventListener('click', () => {
     document.querySelector('.sidebar')?.classList.toggle('open');
@@ -609,6 +617,177 @@ function populateCategorySelect() {
       option.textContent = `${cat.emoji} ${cat.name}`;
       select.appendChild(option);
     });
+  }
+}
+
+// ==========================================
+// My Haats CRUD
+// ==========================================
+
+let myHaats = [];
+
+async function loadMyHaats() {
+  const tbody = document.getElementById('haats-table-body');
+  if (!tbody) return;
+
+  tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">লোড হচ্ছে...</td></tr>';
+
+  try {
+    const snapshot = await db.collection('haats')
+      .where('sellerId', '==', currentUser.uid)
+      .get();
+
+    myHaats = [];
+    snapshot.forEach(doc => {
+      myHaats.push({ id: doc.id, ...doc.data() });
+    });
+    renderMyHaatsTable(myHaats);
+  } catch (error) {
+    console.error('Error loading haats:', error);
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">হাটবার লোড করতে সমস্যা</td></tr>';
+  }
+}
+
+function renderMyHaatsTable(haats) {
+  const tbody = document.getElementById('haats-table-body');
+  if (!tbody) return;
+
+  if (haats.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">কোনো হাটবার নেই। ➕ নতুন হাটবার তৈরি করুন!</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '';
+  haats.forEach(haat => {
+    const tr = document.createElement('tr');
+    let statusHtml = '';
+    if (haat.approved === true) {
+      statusHtml = '<span class="status-badge approved">✅ অনুমোদিত</span>';
+    } else if (haat.approved === false) {
+      statusHtml = '<span class="status-badge rejected">❌ প্রত্যাখ্যান</span>';
+    } else {
+      statusHtml = '<span class="status-badge pending">⏳ অনুমোদন বাকি</span>';
+    }
+
+    let dateStr = 'N/A';
+    if (haat.date) {
+      const d = haat.date.toDate ? haat.date.toDate() : new Date(haat.date);
+      dateStr = d.toLocaleDateString('bn-BD');
+    }
+
+    tr.innerHTML = `
+      <td><strong>${haat.title || ''}</strong></td>
+      <td>${dateStr}</td>
+      <td>${haat.products || 0}টি</td>
+      <td>${statusHtml}</td>
+      <td>
+        <button class="btn btn-sm btn-outline" onclick="openEditHaatModal('${haat.id}')">✏️</button>
+        <button class="btn btn-sm btn-outline" style="color:var(--danger);border-color:var(--danger);" onclick="deleteMyHaat('${haat.id}')">🗑️</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function openAddHaatModal() {
+  const form = document.getElementById('haat-form');
+  if (form) form.reset();
+  document.getElementById('haat-id').value = '';
+  document.getElementById('haat-modal-title').textContent = 'নতুন হাটবার তৈরি করুন';
+
+  const modal = document.getElementById('haat-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.classList.add('active');
+  }
+}
+
+function openEditHaatModal(haatId) {
+  const haat = myHaats.find(h => h.id === haatId);
+  if (!haat) return;
+
+  document.getElementById('haat-id').value = haat.id;
+  document.getElementById('haat-modal-title').textContent = 'হাটবার এডিট করুন';
+  document.getElementById('haat-title').value = haat.title || '';
+  document.getElementById('haat-description').value = haat.description || '';
+  document.getElementById('haat-products-count').value = haat.products || 0;
+
+  if (haat.date) {
+    const d = haat.date.toDate ? haat.date.toDate() : new Date(haat.date);
+    document.getElementById('haat-date').value = d.toISOString().split('T')[0];
+  }
+
+  const modal = document.getElementById('haat-modal');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.classList.add('active');
+  }
+}
+
+function closeHaatModal() {
+  const modal = document.getElementById('haat-modal');
+  if (modal) {
+    modal.classList.remove('active');
+    setTimeout(() => { modal.style.display = 'none'; }, 300);
+  }
+}
+
+async function saveMyHaat(e) {
+  e.preventDefault();
+
+  const haatId = document.getElementById('haat-id').value;
+  const title = document.getElementById('haat-title').value.trim();
+  const dateStr = document.getElementById('haat-date').value;
+  const productsCount = parseInt(document.getElementById('haat-products-count').value) || 0;
+  const description = document.getElementById('haat-description').value.trim();
+
+  if (!title || !dateStr || !description) {
+    showToast('সব প্রয়োজনীয় ফিল্ড পূরণ করুন', 'error');
+    return;
+  }
+
+  try {
+    const haatData = {
+      title,
+      description,
+      date: firebase.firestore.Timestamp.fromDate(new Date(dateStr)),
+      products: productsCount,
+      seller: sellerProfile.name || currentUser.displayName || '',
+      sellerId: currentUser.uid,
+      area: sellerProfile.area || '',
+      shopName: sellerProfile.shopName || '',
+      isLive: false,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    if (haatId) {
+      await db.collection('haats').doc(haatId).update(haatData);
+      showToast('হাটবার আপডেট হয়েছে! ✅', 'success');
+    } else {
+      haatData.approved = null; // pending
+      haatData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      await db.collection('haats').add(haatData);
+      showToast('হাটবার তৈরি হয়েছে! অ্যাডমিন অনুমোদনের অপেক্ষায় 🎉', 'success');
+    }
+
+    closeHaatModal();
+    loadMyHaats();
+  } catch (error) {
+    console.error('Error saving haat:', error);
+    showToast('হাটবার সেভ করতে সমস্যা', 'error');
+  }
+}
+
+async function deleteMyHaat(haatId) {
+  if (!confirm('এই হাটবার ডিলিট করতে চান?')) return;
+
+  try {
+    await db.collection('haats').doc(haatId).delete();
+    showToast('হাটবার ডিলিট হয়েছে', 'success');
+    loadMyHaats();
+  } catch (error) {
+    console.error('Error deleting haat:', error);
+    showToast('ডিলিট করতে সমস্যা', 'error');
   }
 }
 
