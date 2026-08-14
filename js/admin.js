@@ -1035,10 +1035,44 @@ async function toggleHaatLive(haatId, isLive) {
 
 function generateProductQR(productId, productName) {
     const url = `https://ghoroa.shop/#product-${productId}`;
-    const modal = document.createElement('div');
-    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
-    modal.innerHTML = `<div style="background:white;padding:2rem;border-radius:12px;text-align:center;max-width:350px;"><h3 style="color:#333;margin-bottom:1rem;">${productName}</h3><canvas id="qr-canvas"></canvas><p style="color:#666;margin:1rem 0;font-size:0.85rem;">${url}</p><button onclick="this.closest('div').parentElement.remove()" style="padding:0.5rem 2rem;background:#2ecc71;color:white;border:none;border-radius:6px;cursor:pointer;">বন্ধ করুন</button></div>`;
-    document.body.appendChild(modal);
-    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
-    QRCode.toCanvas(document.getElementById('qr-canvas'), url, { width: 200, margin: 2 }, (error) => { if (error) console.error(error); });
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+    overlay.innerHTML = `<div style="background:white;padding:2rem;border-radius:12px;text-align:center;max-width:350px;width:90%;">
+        <h3 style="color:#333;margin-bottom:1rem;">${productName}</h3>
+        <div id="qr-container" style="display:inline-block;margin:1rem 0;"></div>
+        <p style="color:#666;margin:0.5rem 0;font-size:0.8rem;word-break:break-all;">${url}</p>
+        <div style="display:flex;gap:0.5rem;justify-content:center;margin-top:1rem;">
+            <button id="qr-download-btn" style="padding:0.5rem 1.5rem;background:#3498db;color:white;border:none;border-radius:6px;cursor:pointer;">📥 ডাউনলোড</button>
+            <button onclick="this.closest('div').parentElement.parentElement.remove()" style="padding:0.5rem 1.5rem;background:#2ecc71;color:white;border:none;border-radius:6px;cursor:pointer;">বন্ধ করুন</button>
+        </div>
+    </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+    // Generate QR code using qrcodejs
+    setTimeout(() => {
+        const container = document.getElementById('qr-container');
+        if (container && typeof QRCode !== 'undefined') {
+            new QRCode(container, {
+                text: url,
+                width: 200,
+                height: 200,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            // Download button
+            document.getElementById('qr-download-btn').addEventListener('click', () => {
+                const canvas = container.querySelector('canvas');
+                if (canvas) {
+                    const link = document.createElement('a');
+                    link.download = `QR-${productName}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                }
+            });
+        } else {
+            container.innerHTML = '<p style="color:red;">QR লাইব্রেরি লোড হয়নি</p>';
+        }
+    }, 100);
 }
