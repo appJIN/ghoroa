@@ -418,6 +418,13 @@
             <h3>📖 গল্পের দোকান</h3>
             <p id="modal-story-text"></p>
           </div>
+          <div class="review-section" style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
+              <h4 style="margin:0;">⭐ রিভিউ</h4>
+              <button onclick="submitReview(document.getElementById('modal-title')?.dataset?.productId)" class="btn btn-secondary" style="font-size:0.85rem;padding:0.4rem 0.8rem;">✍️ রিভিউ দিন</button>
+            </div>
+            <div id="modal-reviews"><p style="color:var(--text-muted);">রিভিউ লোড হচ্ছে...</p></div>
+          </div>
           <div class="modal-actions">
             <a href="#" class="btn btn-success btn-lg" id="modal-whatsapp" target="_blank" rel="noopener">
               💬 WhatsApp-এ অর্ডার করুন

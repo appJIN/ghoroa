@@ -233,15 +233,23 @@ async function loadDashboardStats() {
     try {
         const productsSnap = await db.collection('products').get();
         const sellersSnap = await db.collection('sellers').get();
+        const haatsSnap = await db.collection('haats').get();
         
         const totalProducts = productsSnap.size;
         const totalSellers = sellersSnap.size;
+        const totalHaats = haatsSnap.size;
         
         let pendingCount = 0;
         sellersSnap.forEach(doc => {
             if (doc.data().approved === false || !doc.data().hasOwnProperty('approved')) {
                 pendingCount++;
             }
+        });
+
+        // Count pending haats
+        let pendingHaats = 0;
+        haatsSnap.forEach(doc => {
+            if (doc.data().approved !== true) pendingHaats++;
         });
 
         const statProducts = document.getElementById('stat-products');
@@ -251,8 +259,8 @@ async function loadDashboardStats() {
 
         if (statProducts) statProducts.textContent = totalProducts;
         if (statSellers) statSellers.textContent = totalSellers;
-        if (statPending) statPending.textContent = pendingCount;
-        if (statAreas) statAreas.textContent = DMP_AREAS.length;
+        if (statPending) statPending.textContent = pendingCount + pendingHaats;
+        if (statAreas) statAreas.textContent = totalHaats;
         
     } catch (error) {
         console.error("Error loading stats:", error);

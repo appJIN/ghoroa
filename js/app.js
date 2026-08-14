@@ -416,7 +416,10 @@ function renderProducts() {
       (p.name || '').toLowerCase().includes(q) ||
       (p.seller || '').toLowerCase().includes(q) ||
       (p.areaName || '').includes(q) ||
-      (p.story || '').toLowerCase().includes(q)
+      (p.area || '').toLowerCase().includes(q) ||
+      (p.story || '').toLowerCase().includes(q) ||
+      (p.badge || '').toLowerCase().includes(q) ||
+      String(p.price).includes(q)
     );
   }
 
@@ -735,6 +738,13 @@ function openProductModal(productId) {
     }).catch(() => {});
   }
 
+  // Store product ID for reviews
+  const modalTitle = document.getElementById('modal-title');
+  if (modalTitle) modalTitle.dataset.productId = String(product.id);
+
+  // Load reviews
+  if (typeof loadProductReviews === 'function') loadProductReviews(String(product.id));
+
   // Show modal
   modal.classList.add('active');
   document.body.style.overflow = 'hidden';
@@ -860,4 +870,56 @@ function initSellerForm() {
     showToast(`🎉 অভিনন্দন ${name}! আপনার দোকান সফলভাবে রেজিস্ট্রেশন হয়েছে!`);
     form.reset();
   });
+}
+
+// ==================== REVIEWS ====================
+
+async function loadProductReviews(productId) {
+  const container = document.getElementById('modal-reviews');
+  if (!container || typeof db === 'undefined') return;
+  container.innerHTML = '<p style="color:var(--text-muted);">????? ??? ?????...</p>';
+  try {
+    const snap = await db.collection('products').doc(productId).collection('reviews').orderBy('createdAt','desc').limit(10).get();
+    if (snap.empty) {
+      container.innerHTML = '<p style="color:var(--text-muted);">???? ???? ????? ???? ????? ????? ???!</p>';
+      return;
+    }
+    let html = '';
+    snap.forEach(doc => {
+      const r = doc.data();
+      const stars = '?'.repeat(r.rating || 5) + '?'.repeat(5 - (r.rating || 5));
+      html += '<div style="padding:0.75rem 0;border-bottom:1px solid var(--border);">' +
+        '<strong>' + (r.name || 'Anonymous') + '</strong> ' + stars +
+        '<br><span style="color:var(--text-muted);font-size:0.9rem;">' + (r.text || '') + '</span></div>';
+    });
+    container.innerHTML = html;
+  } catch(e) {
+    console.error('Review load error:', e);
+    container.innerHTML = '<p style="color:var(--text-muted);">????? ??? ???? ??????</p>';
+  }
+}
+
+async function submitReview(productId) {
+  if (!productId) { alert('????????? ??????? ????'); return; }
+  const name = prompt('????? ???:');
+  if (!name) return;
+  const ratingStr = prompt('????? ??? (1-5):');
+  const rating = parseInt(ratingStr);
+  if (!rating || rating < 1 || rating > 5) { alert('1-5 ?? ????? ????? ???'); return; }
+  const text = prompt('????? ?????:');
+  if (!text) return;
+  try {
+    if (typeof db === 'undefined') { alert('Firebase ????? ???'); return; }
+    await db.collection('products').doc(productId).collection('reviews').add({
+      name: name,
+      rating: rating,
+      text: text,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast('????? ??????? ??? ??????! ?');
+    loadProductReviews(productId);
+  } catch(e) {
+    console.error('Review submit error:', e);
+    alert('????? ??? ???? ??????');
+  }
 }
