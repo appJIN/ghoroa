@@ -196,7 +196,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   initCounterAnimation();
   initSellerForm();
   initModalEvents();
+
+  // Handle URL hash: auto-open product modal from QR code links
+  handleProductHash();
+  window.addEventListener('hashchange', handleProductHash);
 });
+
+function handleProductHash() {
+  const hash = window.location.hash;
+  if (hash && hash.startsWith('#product-')) {
+    const productId = hash.replace('#product-', '');
+    if (productId && PRODUCTS.length > 0) {
+      setTimeout(() => { openProductModal(productId); }, 500);
+    }
+  }
+}
 
 // ==================== FIREBASE DATA LOADING ====================
 
