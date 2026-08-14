@@ -15,9 +15,15 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
   <link rel="canonical" href="https://ghoroa.shop/">
   <meta name="theme-color" content="#006a4e">
-  <meta name="robots" content="index, follow">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <meta name="author" content="ঘরোয়া">
   <meta name="language" content="Bengali">
+  <meta name="geo.region" content="BD">
+  <meta name="geo.placename" content="Dhaka">
+  <meta http-equiv="content-language" content="bn">
+  <link rel="alternate" hreflang="bn" href="https://ghoroa.shop/">
+  <meta property="og:locale" content="bn_BD">
+  <meta property="og:site_name" content="ঘরোয়া">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
@@ -27,44 +33,63 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://firebasestorage.googleapis.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://ghoroa.shop/#organization",
+        "name": "ঘরোয়া - Ghoroa",
+        "url": "https://ghoroa.shop",
+        "description": "বাংলাদেশের প্রথম হোমমেড প্রোডাক্ট মার্কেটপ্লেস",
+        "foundingDate": "2026",
+        "areaServed": {
+          "@type": "City",
+          "name": "Dhaka",
+          "containedInPlace": {
+            "@type": "Country",
+            "name": "Bangladesh"
+          }
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer service",
+          "availableLanguage": "Bengali"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://ghoroa.shop/#website",
+        "url": "https://ghoroa.shop",
+        "name": "ঘরোয়া",
+        "publisher": { "@id": "https://ghoroa.shop/#organization" },
+        "inLanguage": "bn",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://ghoroa.shop/?s={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "হোম", "item": "https://ghoroa.shop/" },
+          { "@type": "ListItem", "position": 2, "name": "পণ্য সমূহ", "item": "https://ghoroa.shop/#products" },
+          { "@type": "ListItem", "position": 3, "name": "হাটবার", "item": "https://ghoroa.shop/#haat" },
+          { "@type": "ListItem", "position": 4, "name": "দোকান খুলুন", "item": "https://ghoroa.shop/#open-shop" }
+        ]
+      }
+    ]
+  }
+  </script>
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- Structured Data: Organization -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "ঘরোয়া",
-    "alternateName": "Ghoroa",
-    "url": "https://ghoroa.shop",
-    "logo": "https://ghoroa.shop/assets/hero.jpg",
-    "description": "বাংলাদেশের প্রথম হোমমেড প্রোডাক্ট মার্কেটপ্লেস — আচার, পিঠা, নকশিকাঁথা, জামদানি, হস্তশিল্প সবকিছু এক জায়গায়।",
-    "areaServed": {
-      "@type": "City",
-      "name": "Dhaka",
-      "addressCountry": "BD"
-    },
-    "sameAs": []
-  }
-  </script>
-
-  <!-- Structured Data: WebSite with Search -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "ঘরোয়া",
-    "alternateName": "Ghoroa",
-    "url": "https://ghoroa.shop",
-    "inLanguage": "bn",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://ghoroa.shop/?q={search_term_string}",
-      "query-input": "required name=search_term_string"
-    }
-  }
-  </script>
 
   <!-- Structured Data: FAQPage -->
   <script type="application/ld+json">
