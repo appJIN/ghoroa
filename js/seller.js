@@ -211,6 +211,8 @@ function switchTab(tabName) {
   if (tabName === 'dashboard') loadDashboardStats();
   if (tabName === 'my-products') loadMyProducts();
   if (tabName === 'my-haats') loadMyHaats();
+  if (tabName === 'my-orders') loadMyOrders();
+  if (tabName === 'notifications') loadNotifications();
 }
 
 // ==========================================
@@ -825,4 +827,135 @@ function showToast(message, type = 'success') {
   setTimeout(() => {
     toast.style.display = 'none';
   }, 3000);
+}
+
+// ==========================================
+// Orders Tracking
+// ==========================================
+
+async function loadMyOrders() {
+  const tbody = document.getElementById('orders-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">??? ?????...</td></tr>';
+
+  try {
+    const snapshot = await db.collection('orders')
+      .where('sellerId', '==', currentUser.uid)
+      .orderBy('createdAt', 'desc')
+      .limit(20)
+      .get();
+
+    if (snapshot.empty) {
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">???? ?????? ???? ?????????? WhatsApp-? ?????? ???? ????? ???????</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = '';
+    snapshot.forEach(doc => {
+      const order = doc.data();
+      const tr = document.createElement('tr');
+      let statusHtml = '';
+      switch(order.status) {
+        case 'pending': statusHtml = '<span class="status-badge pending">? ?????????</span>'; break;
+        case 'confirmed': statusHtml = '<span class="status-badge approved">? ???????</span>'; break;
+        case 'delivered': statusHtml = '<span class="status-badge approved">?? ????????</span>'; break;
+        case 'cancelled': statusHtml = '<span class="status-badge rejected">? ?????</span>'; break;
+        default: statusHtml = '<span class="status-badge pending">? ?????????</span>';
+      }
+      let dateStr = 'N/A';
+      if (order.createdAt) {
+        const d = order.createdAt.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
+        dateStr = d.toLocaleDateString('bn-BD');
+      }
+      tr.innerHTML = '<td><strong>' + (order.productName || '') + '</strong></td>' +
+        '<td>' + (order.buyerName || '?????') + '</td>' +
+        '<td>' + dateStr + '</td>' +
+        '<td>' + statusHtml + '</td>' +
+        '<td><button class="btn btn-sm btn-outline" onclick="updateOrderStatus(\'' + doc.id + '\')">?????</button></td>';
+      tbody.appendChild(tr);
+    });
+  } catch(error) {
+    console.error('Error loading orders:', error);
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">?????? ??? ???? ??????</td></tr>';
+  }
+}
+
+async function updateOrderStatus(orderId) {
+  const status = prompt('???? ????????? ?????:\n1 = ?????????\n2 = ???????\n3 = ????????\n4 = ?????');
+  const statusMap = { '1': 'pending', '2': 'confirmed', '3': 'delivered', '4': 'cancelled' };
+  const newStatus = statusMap[status];
+  if (!newStatus) return;
+  try {
+    await db.collection('orders').doc(orderId).update({ status: newStatus, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    showToast('?????? ????????? ????? ??????! ?', 'success');
+    loadMyOrders();
+  } catch(e) {
+    console.error('Order update error:', e);
+    showToast('????? ???? ??????', 'error');
+  }
+}
+
+// ==========================================
+// Notifications
+// ==========================================
+
+async function loadNotifications() {
+  const container = document.getElementById('notifications-list');
+  if (!container) return;
+  container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem;">??? ?????...</p>';
+
+  try {
+    // Load haat approval notifications
+    const haatsSnap = await db.collection('haats')
+      .where('sellerId', '==', currentUser.uid)
+      .get();
+
+    let notifications = [];
+
+    haatsSnap.forEach(doc => {
+      const haat = doc.data();
+      if (haat.approved === true) {
+        notifications.push({ type: 'success', icon: '?', text: '"' + (haat.title||'') + '" ?????? ???????? ??????!', time: haat.updatedAt });
+      } else if (haat.approved === false) {
+        notifications.push({ type: 'error', icon: '?', text: '"' + (haat.title||'') + '" ?????? ???????????? ???????', time: haat.updatedAt });
+      } else {
+        notifications.push({ type: 'warning', icon: '?', text: '"' + (haat.title||'') + '" ????????? ?????????...', time: haat.createdAt });
+      }
+    });
+
+    // Load order notifications
+    const ordersSnap = await db.collection('orders')
+      .where('sellerId', '==', currentUser.uid)
+      .orderBy('createdAt', 'desc')
+      .limit(5)
+      .get();
+
+    ordersSnap.forEach(doc => {
+      const order = doc.data();
+      notifications.push({ type: 'info', icon: '??', text: '???? ??????: "' + (order.productName||'') + '" - ' + (order.buyerName||''), time: order.createdAt });
+    });
+
+    if (notifications.length === 0) {
+      container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem;">???? ???? ?????????? ???</p>';
+      return;
+    }
+
+    // Sort by time
+    notifications.sort((a, b) => {
+      const ta = a.time?.toDate ? a.time.toDate() : new Date(0);
+      const tb = b.time?.toDate ? b.time.toDate() : new Date(0);
+      return tb - ta;
+    });
+
+    container.innerHTML = notifications.map(n => {
+      const colors = { success: 'rgba(46,204,113,0.1)', error: 'rgba(231,76,60,0.1)', warning: 'rgba(243,156,18,0.1)', info: 'rgba(52,152,219,0.1)' };
+      return '<div style="padding:0.75rem;margin-bottom:0.5rem;background:' + (colors[n.type]||colors.info) + ';border-radius:8px;display:flex;align-items:center;gap:0.75rem;">' +
+        '<span style="font-size:1.5rem;">' + n.icon + '</span>' +
+        '<span>' + n.text + '</span></div>';
+    }).join('');
+
+  } catch(error) {
+    console.error('Error loading notifications:', error);
+    container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem;">?????????? ??? ???? ??????</p>';
+  }
 }

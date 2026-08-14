@@ -110,6 +110,18 @@
               <span>আমার হাটবার</span>
             </a>
           </li>
+          <li>
+            <a href="#" class="nav-item" data-tab="my-orders">
+              <span class="nav-icon">📦</span>
+              <span>অর্ডার ট্র্যাকিং</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-item" data-tab="notifications">
+              <span class="nav-icon">🔔</span>
+              <span>নোটিফিকেশন</span>
+            </a>
+          </li>
         </ul>
       </nav>
 
@@ -274,6 +286,45 @@
           </div>
           <div style="margin-top:1rem;padding:0.75rem;background:rgba(243,156,18,0.1);border-radius:8px;border:1px solid rgba(243,156,18,0.3);">
             <small>⚠️ হাটবার তৈরির পর অ্যাডমিন অনুমোদন দিলে মেইন সাইটে দেখাবে।</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== ORDERS TAB ==================== -->
+      <div class="tab-content" data-tab="my-orders">
+        <div class="content-area">
+          <div class="tab-header">
+            <h3>📦 অর্ডার ট্র্যাকিং</h3>
+          </div>
+          <div class="card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>পণ্য</th>
+                    <th>ক্রেতা</th>
+                    <th>তারিখ</th>
+                    <th>স্ট্যাটাস</th>
+                    <th>অ্যাকশন</th>
+                  </tr>
+                </thead>
+                <tbody id="orders-table-body">
+                  <tr><td colspan="5" class="text-center py-4">কোনো অর্ডার নেই</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== NOTIFICATIONS TAB ==================== -->
+      <div class="tab-content" data-tab="notifications">
+        <div class="content-area">
+          <div class="tab-header">
+            <h3>🔔 নোটিফিকেশন</h3>
+          </div>
+          <div id="notifications-list" class="card" style="padding:1rem;">
+            <p style="color:var(--text-muted);text-align:center;padding:2rem;">কোনো নতুন নোটিফিকেশন নেই</p>
           </div>
         </div>
       </div>
