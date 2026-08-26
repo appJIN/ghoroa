@@ -213,6 +213,7 @@ function switchTab(tabName) {
     if (tabName === 'products') loadProducts();
     if (tabName === 'sellers') loadSellers();
     if (tabName === 'haats') loadHaats();
+    if (tabName === 'orders') loadAdminOrders();
 }
 
 /**
@@ -1076,3 +1077,66 @@ function generateProductQR(productId, productName) {
         }
     }, 100);
 }
+
+// ==========================================
+// Admin Orders Management
+// ==========================================
+
+async function loadAdminOrders() {
+    const tbody = document.getElementById('admin-orders-table-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">অর্ডার লোড হচ্ছে...</td></tr>';
+
+    try {
+        const snapshot = await db.collection('orders').orderBy('createdAt', 'desc').limit(50).get();
+
+        if (snapshot.empty) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">এখনো কোনো অর্ডার আসেনি</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        snapshot.forEach(doc => {
+            const order = doc.data();
+            const tr = document.createElement('tr');
+
+            let statusHtml = '';
+            switch(order.status) {
+                case 'pending': statusHtml = '<span class="badge bg-warning text-dark">⏳ পেন্ডিং</span>'; break;
+                case 'confirmed': statusHtml = '<span class="badge bg-info">✅ কনফার্মড</span>'; break;
+                case 'delivered': statusHtml = '<span class="badge bg-success">📦 ডেলিভার্ড</span>'; break;
+                case 'cancelled': statusHtml = '<span class="badge bg-danger">❌ বাতিল</span>'; break;
+                default: statusHtml = '<span class="badge bg-warning text-dark">⏳ পেন্ডিং</span>';
+            }
+
+            let dateStr = 'N/A';
+            if (order.createdAt) {
+                const d = order.createdAt.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
+                dateStr = formatDate(d);
+            }
+
+            tr.innerHTML = `
+                <td>
+                    <strong>${order.productName || 'পণ্য'}</strong>
+                </td>
+                <td>${order.sellerName || order.sellerId || 'সেলার'}</td>
+                <td>
+                    <strong>${order.buyerName || 'ক্রেতা'}</strong>
+                    <br><small style="color:var(--text-muted);">📞 ${order.buyerPhone || ''} · 📍 ${order.buyerArea || ''}</small>
+                </td>
+                <td>
+                    ${order.quantity || 1}টি — ৳${order.totalAmount || 0}
+                    <br><small style="color:var(--text-muted);">${order.paymentMethod === 'bkash' ? 'বিকাশ/নগদ' : 'ক্যাশ অন ডেলিভারি'}</small>
+                </td>
+                <td>${dateStr}</td>
+                <td>${statusHtml}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (error) {
+        console.error('Error loading admin orders:', error);
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">অর্ডার লোড করতে সমস্যা হয়েছে</td></tr>';
+    }
+}
+

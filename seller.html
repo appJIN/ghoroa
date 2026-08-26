@@ -126,6 +126,10 @@
       </nav>
 
       <div class="sidebar-footer">
+        <a href="#" id="view-my-shop-btn" class="nav-item" target="_blank" onclick="if(currentUser) window.open('shop.html#' + currentUser.uid); return false;">
+          <span class="nav-icon">🏪</span>
+          <span>আমার দোকান দেখুন</span>
+        </a>
         <a href="index.html" class="nav-item">
           <span class="nav-icon">🌐</span>
           <span>মেইন সাইটে যান</span>
@@ -239,6 +243,11 @@
                     <label>ফোন নম্বর</label>
                     <input type="tel" id="shop-phone" class="form-control">
                   </div>
+                  <div class="form-group">
+                    <label>Facebook ID / পেজ নাম</label>
+                    <input type="text" id="shop-facebook" class="form-control" placeholder="যেমন: yourname অথবা your.page.name">
+                    <small style="color:var(--text-muted);">m.me/এর পরের অংশ লিখুন। যেমন fb.com/rahim.uddin হলে লিখুন: rahim.uddin</small>
+                  </div>
                 </div>
                 <div class="form-row">
                   <div class="form-group">
@@ -252,7 +261,11 @@
                   <label>আপনার গল্প</label>
                   <textarea id="shop-story" class="form-control" rows="4"></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">💾 সেভ করুন</button>
+                <div style="display:flex;gap:0.75rem;margin-top:1rem;flex-wrap:wrap;">
+                  <button type="submit" class="btn btn-primary">💾 সেভ করুন</button>
+                  <button type="button" class="btn btn-outline" onclick="showShopQR()">📱 দোকানের QR কোড</button>
+                  <button type="button" class="btn btn-secondary" onclick="if(currentUser) window.open('shop.html#' + currentUser.uid, '_blank')">🌐 দোকান পেজ দেখুন</button>
+                </div>
               </form>
             </div>
           </div>
@@ -442,6 +455,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="js/firebase-config.js"></script>
   <script src="js/seller.js"></script>
 </body>

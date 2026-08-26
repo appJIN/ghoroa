@@ -17,6 +17,12 @@ service cloud.firestore {
       allow create: if isAuthenticated();
       allow update, delete: if isAdmin() || 
         (isAuthenticated() && resource.data.seller == request.auth.uid);
+
+      // Reviews subcollection: Anyone reads and creates, admin can delete
+      match /reviews/{reviewId} {
+        allow read, create: if true;
+        allow update, delete: if isAdmin();
+      }
     }
 
     // Sellers: Anyone reads, auth users create own, owner/admin update/delete
@@ -34,6 +40,20 @@ service cloud.firestore {
       allow create: if isAuthenticated();
       allow update, delete: if isAdmin() || 
         (isAuthenticated() && resource.data.sellerId == request.auth.uid);
+    }
+
+    // Orders: Anyone (buyers) can create, seller/admin can read & update
+    match /orders/{orderId} {
+      allow create: if true;
+      allow read, update: if isAdmin() || 
+        (isAuthenticated() && resource.data.sellerId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // Seller leads (from landing page onboarding form)
+    match /seller_leads/{leadId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
     }
   }
 }

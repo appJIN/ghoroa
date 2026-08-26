@@ -482,6 +482,28 @@ function renderHaats() {
   const grid = document.getElementById('haat-grid');
   if (!grid) return;
 
+  if (HAATS.length === 0) {
+    grid.innerHTML = `
+      <div class="haat-empty-state glass animate-on-scroll" style="grid-column: 1 / -1; text-align: center; padding: 3rem 1.5rem; border-radius: 16px;">
+        <span style="font-size: 3.5rem; display: block; margin-bottom: 0.75rem;">🎪</span>
+        <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">পরবর্তী ফ্ল্যাশ হাটবার শীঘ্রই আসছে!</h3>
+        <p style="color: var(--text-muted); max-width: 520px; margin: 0 auto 1.5rem auto; line-height: 1.6;">
+          প্রতি শুক্রবার ও শনিবার আমাদের ঘরে তৈরি খাবারের বিশেষ ফ্ল্যাশ হাট বসে। আপনিও কি নিজের ঘরে তৈরি পণ্য নিয়ে হাট বসাতে চান?
+        </p>
+        <div style="display: inline-flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center;">
+          <button class="btn btn-secondary" onclick="showToast('শুক্রবার সকাল ১০টায় শুরু হলে নোটিফিকেশন পাবেন! 🔔')">
+            🔔 রিমাইন্ডার সেট করুন
+          </button>
+          <a href="seller.html" class="btn btn-primary">
+            🏪 সেলার প্যানেল থেকে হাট বসান
+          </a>
+        </div>
+      </div>
+    `;
+    initScrollAnimations();
+    return;
+  }
+
   grid.innerHTML = HAATS.map(haat => `
     <div class="haat-card glass animate-on-scroll">
       ${haat.isLive ? '<div class="live-badge"><span class="live-dot"></span> LIVE</div>' : ''}
@@ -752,9 +774,18 @@ function openProductModal(productId) {
     }).catch(() => {});
   }
 
-  // Store product ID for reviews
+  // Store product data for orders & reviews
   const modalTitle = document.getElementById('modal-title');
-  if (modalTitle) modalTitle.dataset.productId = String(product.id);
+  if (modalTitle) {
+    modalTitle.dataset.productId = String(product.id);
+    modalTitle.dataset.sellerId = product.sellerId || '';
+    modalTitle.dataset.productName = product.name || '';
+    modalTitle.dataset.productPrice = String(product.price || 0);
+    modalTitle.dataset.productImage = product.image || '';
+  }
+
+  // Reset review form if open
+  toggleReviewForm(false);
 
   // Load reviews
   if (typeof loadProductReviews === 'function') loadProductReviews(String(product.id));
@@ -770,6 +801,7 @@ function closeModal() {
     modal.classList.remove('active');
     document.body.style.overflow = '';
   }
+  toggleReviewForm(false);
 }
 
 // ==================== COUNTDOWN TIMER ====================
@@ -872,68 +904,308 @@ function initSellerForm() {
   if (areaSelect) {
     AREAS.forEach(area => {
       const option = document.createElement('option');
-      option.value = area.id;
+      option.value = area.name;
       option.textContent = area.name;
       areaSelect.appendChild(option);
     });
   }
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const name = document.getElementById('seller-name-input')?.value;
-    showToast(`🎉 অভিনন্দন ${name}! আপনার দোকান সফলভাবে রেজিস্ট্রেশন হয়েছে!`);
+    const name = document.getElementById('seller-name-input')?.value.trim();
+    const phone = document.getElementById('seller-phone')?.value.trim();
+    const area = document.getElementById('seller-area-select')?.value;
+    const category = document.getElementById('seller-category-select')?.value;
+    const story = document.getElementById('seller-story')?.value.trim();
+
+    if (!name || !phone || !area) {
+      showToast('অনুগ্রহ করে নাম, ফোন নম্বর এবং এলাকা দিন');
+      return;
+    }
+
+    try {
+      if (typeof db !== 'undefined') {
+        await db.collection('seller_leads').add({
+          name,
+          phone,
+          area,
+          category: category || '',
+          story: story || '',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+    } catch (err) {
+      console.warn('Lead save notice:', err.message);
+    }
+
+    showToast(`🎉 অভিনন্দন ${name}! আপনার আবেদন গ্রহণ করা হয়েছে!`);
     form.reset();
+
+    // Friendly prompt to complete shop setup
+    setTimeout(() => {
+      if (confirm('অভিনন্দন! আপনার দোকান খোলার আবেদন জমা হয়েছে। আপনি কি এখনই Google দিয়ে লগইন করে পণ্য যোগ করতে চান?')) {
+        window.location.href = 'seller.html';
+      }
+    }, 800);
   });
 }
 
 // ==================== REVIEWS ====================
 
+function toggleReviewForm(show) {
+  const form = document.getElementById('review-form');
+  const btn = document.getElementById('toggle-review-btn');
+  if (!form) return;
+
+  const willShow = show !== undefined ? show : (form.style.display === 'none');
+  form.style.display = willShow ? 'block' : 'none';
+  if (btn) btn.textContent = willShow ? '✕ বন্ধ করুন' : '✍️ রিভিউ দিন';
+}
+
+function setReviewRating(rating) {
+  const hiddenInput = document.getElementById('review-rating-val');
+  if (hiddenInput) hiddenInput.value = rating;
+
+  const stars = document.querySelectorAll('#star-rating-select span');
+  stars.forEach((star, index) => {
+    if (index < rating) {
+      star.textContent = '★';
+      star.style.color = '#f39c12';
+    } else {
+      star.textContent = '☆';
+      star.style.color = 'var(--text-muted)';
+    }
+  });
+}
+
+async function handleReviewSubmit(e) {
+  e.preventDefault();
+  const modalTitle = document.getElementById('modal-title');
+  const productId = modalTitle?.dataset?.productId;
+  if (!productId) {
+    showToast('প্রোডাক্ট পাওয়া যায়নি');
+    return;
+  }
+
+  const name = document.getElementById('review-user-name')?.value.trim() || 'শুভাকাঙ্ক্ষী ক্রেতা';
+  const rating = parseInt(document.getElementById('review-rating-val')?.value) || 5;
+  const text = document.getElementById('review-user-text')?.value.trim();
+
+  if (!text) {
+    showToast('আপনার মন্তব্য লিখুন');
+    return;
+  }
+
+  const submitBtn = document.getElementById('submit-review-btn');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'জমা হচ্ছে...';
+  }
+
+  try {
+    if (typeof db === 'undefined') throw new Error('Firebase সংযোগ নেই');
+
+    await db.collection('products').doc(productId).collection('reviews').add({
+      name,
+      rating,
+      text,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    showToast('ধন্যবাদ! আপনার রিভিউ সফলভাবে জমা হয়েছে ⭐');
+    document.getElementById('review-form')?.reset();
+    setReviewRating(5);
+    toggleReviewForm(false);
+    loadProductReviews(productId);
+  } catch (error) {
+    console.error('Review submit error:', error);
+    showToast('রিভিউ জমা দিতে সমস্যা হয়েছে');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'জমা দিন';
+    }
+  }
+}
+
 async function loadProductReviews(productId) {
   const container = document.getElementById('modal-reviews');
   if (!container || typeof db === 'undefined') return;
-  container.innerHTML = '<p style="color:var(--text-muted);">????? ??? ?????...</p>';
+  container.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;">রিভিউ লোড হচ্ছে...</p>';
+
   try {
-    const snap = await db.collection('products').doc(productId).collection('reviews').orderBy('createdAt','desc').limit(10).get();
+    const snap = await db.collection('products').doc(productId).collection('reviews').orderBy('createdAt', 'desc').limit(10).get();
     if (snap.empty) {
-      container.innerHTML = '<p style="color:var(--text-muted);">???? ???? ????? ???? ????? ????? ???!</p>';
+      container.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;padding:0.5rem 0;">এখনো কোনো রিভিউ নেই। প্রথম রিভিউ দিন!</p>';
       return;
     }
     let html = '';
     snap.forEach(doc => {
       const r = doc.data();
-      const stars = '?'.repeat(r.rating || 5) + '?'.repeat(5 - (r.rating || 5));
-      html += '<div style="padding:0.75rem 0;border-bottom:1px solid var(--border);">' +
-        '<strong>' + (r.name || 'Anonymous') + '</strong> ' + stars +
-        '<br><span style="color:var(--text-muted);font-size:0.9rem;">' + (r.text || '') + '</span></div>';
+      const rating = r.rating || 5;
+      const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+      let dateStr = '';
+      if (r.createdAt) {
+        const d = r.createdAt.toDate ? r.createdAt.toDate() : new Date(r.createdAt);
+        dateStr = ` · ${formatBanglaDate(d)}`;
+      }
+      html += `
+        <div style="padding:0.75rem 0;border-bottom:1px solid var(--border);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.25rem;">
+            <strong>${r.name || 'Anonymous'}</strong>
+            <span style="color:#f39c12;font-size:0.95rem;">${stars}</span>
+          </div>
+          <p style="color:var(--text);font-size:0.9rem;margin:0.25rem 0;">${r.text || ''}</p>
+          <small style="color:var(--text-muted);font-size:0.75rem;">${dateStr}</small>
+        </div>
+      `;
     });
     container.innerHTML = html;
-  } catch(e) {
+  } catch (e) {
     console.error('Review load error:', e);
-    container.innerHTML = '<p style="color:var(--text-muted);">????? ??? ???? ??????</p>';
+    container.innerHTML = '<p style="color:var(--text-muted);font-size:0.9rem;">রিভিউ লোড করা যায়নি</p>';
   }
 }
 
-async function submitReview(productId) {
-  if (!productId) { alert('????????? ??????? ????'); return; }
-  const name = prompt('????? ???:');
-  if (!name) return;
-  const ratingStr = prompt('????? ??? (1-5):');
-  const rating = parseInt(ratingStr);
-  if (!rating || rating < 1 || rating > 5) { alert('1-5 ?? ????? ????? ???'); return; }
-  const text = prompt('????? ?????:');
-  if (!text) return;
-  try {
-    if (typeof db === 'undefined') { alert('Firebase ????? ???'); return; }
-    await db.collection('products').doc(productId).collection('reviews').add({
-      name: name,
-      rating: rating,
-      text: text,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+function submitReview(productId) {
+  toggleReviewForm(true);
+}
+
+// ==================== DIRECT ORDER HANDLING ====================
+
+let currentOrderProduct = null;
+
+function openOrderModal() {
+  const modalTitle = document.getElementById('modal-title');
+  if (!modalTitle) return;
+
+  const productId = modalTitle.dataset.productId;
+  const product = PRODUCTS.find(p => String(p.id) === String(productId));
+
+  currentOrderProduct = product || {
+    id: productId,
+    name: modalTitle.dataset.productName || 'পণ্য',
+    price: parseInt(modalTitle.dataset.productPrice) || 0,
+    image: modalTitle.dataset.productImage || 'assets/achar.jpg',
+    sellerId: modalTitle.dataset.sellerId || '',
+    sellerPhone: ''
+  };
+
+  document.getElementById('order-product-id').value = currentOrderProduct.id;
+  document.getElementById('order-seller-id').value = currentOrderProduct.sellerId || '';
+  document.getElementById('order-summary-title').textContent = currentOrderProduct.name;
+  document.getElementById('order-summary-price').textContent = formatPrice(currentOrderProduct.price);
+  document.getElementById('order-summary-img').src = currentOrderProduct.image;
+  document.getElementById('order-quantity').value = 1;
+
+  // Auto-populate area select in order modal
+  const areaSelect = document.getElementById('order-buyer-area');
+  if (areaSelect && areaSelect.options.length <= 1) {
+    AREAS.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a.name;
+      opt.textContent = a.name;
+      areaSelect.appendChild(opt);
     });
-    showToast('????? ??????? ??? ??????! ?');
-    loadProductReviews(productId);
-  } catch(e) {
-    console.error('Review submit error:', e);
-    alert('????? ??? ???? ??????');
+  }
+
+  updateOrderTotal();
+
+  const orderModal = document.getElementById('order-modal');
+  if (orderModal) {
+    orderModal.style.display = 'flex';
+    orderModal.classList.add('active');
+  }
+}
+
+function closeOrderModal() {
+  const orderModal = document.getElementById('order-modal');
+  if (orderModal) {
+    orderModal.classList.remove('active');
+    setTimeout(() => { orderModal.style.display = 'none'; }, 250);
+  }
+}
+
+function updateOrderTotal() {
+  if (!currentOrderProduct) return;
+  const qtyInput = document.getElementById('order-quantity');
+  const qty = Math.max(1, parseInt(qtyInput?.value) || 1);
+  const total = currentOrderProduct.price * qty;
+  const totalEl = document.getElementById('order-total-amount');
+  if (totalEl) totalEl.textContent = formatPrice(total);
+}
+
+async function handleDirectOrderSubmit(e) {
+  e.preventDefault();
+  if (!currentOrderProduct) return;
+
+  const buyerName = document.getElementById('order-buyer-name')?.value.trim();
+  const buyerPhone = document.getElementById('order-buyer-phone')?.value.trim();
+  const quantity = parseInt(document.getElementById('order-quantity')?.value) || 1;
+  const buyerArea = document.getElementById('order-buyer-area')?.value;
+  const buyerAddress = document.getElementById('order-buyer-address')?.value.trim();
+  const paymentMethod = document.querySelector('input[name="order-payment"]:checked')?.value || 'cod';
+
+  if (!buyerName || !buyerPhone || !buyerArea || !buyerAddress) {
+    showToast('সবগুলো প্রয়োজনীয় তথ্য পূরণ করুন');
+    return;
+  }
+
+  const submitBtn = document.getElementById('order-submit-btn');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'অর্ডার প্রক্রিয়াধীন...';
+  }
+
+  const totalAmount = currentOrderProduct.price * quantity;
+
+  const orderData = {
+    productId: currentOrderProduct.id,
+    productName: currentOrderProduct.name,
+    productImage: currentOrderProduct.image || '',
+    unitPrice: currentOrderProduct.price,
+    quantity,
+    totalAmount,
+    buyerName,
+    buyerPhone,
+    buyerArea,
+    buyerAddress,
+    paymentMethod,
+    sellerId: currentOrderProduct.sellerId || '',
+    sellerName: currentOrderProduct.seller || '',
+    status: 'pending',
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+
+  try {
+    if (typeof db !== 'undefined') {
+      await db.collection('orders').add(orderData);
+    }
+
+    closeOrderModal();
+    closeModal();
+    showToast(`🎉 অর্ডার সম্পন্ন হয়েছে! ধন্যবাদ ${buyerName}! বিক্রেতা শীঘ্রই আপনার সাথে যোগাযোগ করবেন।`);
+    document.getElementById('direct-order-form')?.reset();
+
+    // Offer to ping seller on WhatsApp if sellerPhone exists
+    if (currentOrderProduct.sellerPhone) {
+      let ph = currentOrderProduct.sellerPhone;
+      if (!ph.startsWith('88')) ph = '88' + ph;
+      const payText = paymentMethod === 'bkash' ? 'বিকাশ/নগদ' : 'ক্যাশ অন ডেলিভারি';
+      const msg = encodeURIComponent(`হ্যালো, আমি ঘরোয়া থেকে "${currentOrderProduct.name}" (${toBanglaNumber(quantity)}টি) অর্ডার করেছি।\nমোট: ${formatPrice(totalAmount)}\nপেমেন্ট: ${payText}\nনাম: ${buyerName}\nফোন: ${buyerPhone}\nঠিকানা: ${buyerAddress}, ${buyerArea}`);
+      setTimeout(() => {
+        if (confirm('আপনার অর্ডার সফল হয়েছে! আপনি কি বিক্রেতাকে WhatsApp-এ অর্ডার বিবরণ পাঠাতে চান?')) {
+          window.open(`https://wa.me/${ph}?text=${msg}`, '_blank');
+        }
+      }, 500);
+    }
+  } catch (error) {
+    console.error('Order placement error:', error);
+    showToast('অর্ডার সম্পন্ন করতে সমস্যা হয়েছে, অনুগ্রহ করে আবার চেষ্টা করুন');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '✅ অর্ডার নিশ্চিত করুন';
+    }
   }
 }

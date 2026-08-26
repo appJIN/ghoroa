@@ -297,6 +297,9 @@ function renderProductsTable(products) {
         <button class="btn btn-sm btn-outline" onclick="openEditProductModal('${product.id}')" title="এডিট">
           ✏️ এডিট
         </button>
+        <button class="btn btn-sm btn-outline" onclick="showProductQR('${product.id}', '${(product.name || 'Unnamed').replace(/'/g, "\\'")}')" title="QR কোড">
+          📱 QR
+        </button>
         <button class="btn btn-sm btn-outline" style="color:var(--danger);border-color:var(--danger);" onclick="deleteProduct('${product.id}')" title="ডিলিট">
           🗑️ ডিলিট
         </button>
@@ -836,7 +839,7 @@ function showToast(message, type = 'success') {
 async function loadMyOrders() {
   const tbody = document.getElementById('orders-table-body');
   if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">??? ?????...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">অর্ডার লোড হচ্ছে...</td></tr>';
 
   try {
     const snapshot = await db.collection('orders')
@@ -846,7 +849,7 @@ async function loadMyOrders() {
       .get();
 
     if (snapshot.empty) {
-      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">???? ?????? ???? ?????????? WhatsApp-? ?????? ???? ????? ???????</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4" style="color:var(--text-muted);">এখনো কোনো সরাসরি অর্ডার আসেনি। ক্রেতারা ওয়েবসাইট থেকে অর্ডার করলে এখানে দেখাবে।</td></tr>';
       return;
     }
 
@@ -856,42 +859,53 @@ async function loadMyOrders() {
       const tr = document.createElement('tr');
       let statusHtml = '';
       switch(order.status) {
-        case 'pending': statusHtml = '<span class="status-badge pending">? ?????????</span>'; break;
-        case 'confirmed': statusHtml = '<span class="status-badge approved">? ???????</span>'; break;
-        case 'delivered': statusHtml = '<span class="status-badge approved">?? ????????</span>'; break;
-        case 'cancelled': statusHtml = '<span class="status-badge rejected">? ?????</span>'; break;
-        default: statusHtml = '<span class="status-badge pending">? ?????????</span>';
+        case 'pending': statusHtml = '<span class="status-badge pending">⏳ পেন্ডিং</span>'; break;
+        case 'confirmed': statusHtml = '<span class="status-badge approved">✅ কনফার্মড</span>'; break;
+        case 'delivered': statusHtml = '<span class="status-badge approved">📦 ডেলিভার্ড</span>'; break;
+        case 'cancelled': statusHtml = '<span class="status-badge rejected">❌ বাতিল</span>'; break;
+        default: statusHtml = '<span class="status-badge pending">⏳ পেন্ডিং</span>';
       }
       let dateStr = 'N/A';
       if (order.createdAt) {
         const d = order.createdAt.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
         dateStr = d.toLocaleDateString('bn-BD');
       }
-      tr.innerHTML = '<td><strong>' + (order.productName || '') + '</strong></td>' +
-        '<td>' + (order.buyerName || '?????') + '</td>' +
-        '<td>' + dateStr + '</td>' +
-        '<td>' + statusHtml + '</td>' +
-        '<td><button class="btn btn-sm btn-outline" onclick="updateOrderStatus(\'' + doc.id + '\')">?????</button></td>';
+      const buyerInfo = `<strong>${order.buyerName || 'ক্রেতা'}</strong><br><small style="color:var(--text-muted);">📞 ${order.buyerPhone || ''} · 📍 ${order.buyerArea || ''}</small>`;
+      const productInfo = `<strong>${order.productName || ''}</strong><br><small style="color:var(--text-muted);">${order.quantity || 1}টি · ৳${order.totalAmount || 0} (${order.paymentMethod === 'bkash' ? 'বিকাশ' : 'ক্যাশ'})</small>`;
+
+      tr.innerHTML = `
+        <td>${productInfo}</td>
+        <td>${buyerInfo}</td>
+        <td>${dateStr}</td>
+        <td>${statusHtml}</td>
+        <td>
+          <button class="btn btn-sm btn-outline" onclick="updateOrderStatus('${doc.id}')">আপডেট</button>
+        </td>
+      `;
       tbody.appendChild(tr);
     });
   } catch(error) {
     console.error('Error loading orders:', error);
-    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">?????? ??? ???? ??????</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">অর্ডার লোড করতে সমস্যা হয়েছে</td></tr>';
   }
 }
 
 async function updateOrderStatus(orderId) {
-  const status = prompt('???? ????????? ?????:\n1 = ?????????\n2 = ???????\n3 = ????????\n4 = ?????');
+  const status = prompt('নতুন স্ট্যাটাস নির্বাচন করুন:\n১ = পেন্ডিং (Pending)\n২ = কনফার্মড (Confirmed)\n৩ = ডেলিভার্ড (Delivered)\n৪ = বাতিল (Cancelled)');
   const statusMap = { '1': 'pending', '2': 'confirmed', '3': 'delivered', '4': 'cancelled' };
   const newStatus = statusMap[status];
   if (!newStatus) return;
+
   try {
-    await db.collection('orders').doc(orderId).update({ status: newStatus, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
-    showToast('?????? ????????? ????? ??????! ?', 'success');
+    await db.collection('orders').doc(orderId).update({
+      status: newStatus,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast('অর্ডারের স্ট্যাটাস আপডেট হয়েছে! ✅', 'success');
     loadMyOrders();
   } catch(e) {
     console.error('Order update error:', e);
-    showToast('????? ???? ??????', 'error');
+    showToast('স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে', 'error');
   }
 }
 
@@ -902,7 +916,7 @@ async function updateOrderStatus(orderId) {
 async function loadNotifications() {
   const container = document.getElementById('notifications-list');
   if (!container) return;
-  container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem;">??? ?????...</p>';
+  container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:1rem;">নোটিফিকেশন লোড হচ্ছে...</p>';
 
   try {
     // Load haat approval notifications
@@ -915,11 +929,11 @@ async function loadNotifications() {
     haatsSnap.forEach(doc => {
       const haat = doc.data();
       if (haat.approved === true) {
-        notifications.push({ type: 'success', icon: '?', text: '"' + (haat.title||'') + '" ?????? ???????? ??????!', time: haat.updatedAt });
+        notifications.push({ type: 'success', icon: '✅', text: `"${haat.title || ''}" হাটবার অনুমোদিত হয়েছে!`, time: haat.updatedAt || haat.createdAt });
       } else if (haat.approved === false) {
-        notifications.push({ type: 'error', icon: '?', text: '"' + (haat.title||'') + '" ?????? ???????????? ???????', time: haat.updatedAt });
+        notifications.push({ type: 'error', icon: '❌', text: `"${haat.title || ''}" হাটবার অনুমোদন পায়নি।`, time: haat.updatedAt || haat.createdAt });
       } else {
-        notifications.push({ type: 'warning', icon: '?', text: '"' + (haat.title||'') + '" ????????? ?????????...', time: haat.createdAt });
+        notifications.push({ type: 'warning', icon: '⏳', text: `"${haat.title || ''}" হাটবার অনুমোদনের অপেক্ষায় রয়েছে।`, time: haat.createdAt });
       }
     });
 
@@ -927,35 +941,109 @@ async function loadNotifications() {
     const ordersSnap = await db.collection('orders')
       .where('sellerId', '==', currentUser.uid)
       .orderBy('createdAt', 'desc')
-      .limit(5)
+      .limit(10)
       .get();
 
     ordersSnap.forEach(doc => {
       const order = doc.data();
-      notifications.push({ type: 'info', icon: '??', text: '???? ??????: "' + (order.productName||'') + '" - ' + (order.buyerName||''), time: order.createdAt });
+      notifications.push({ type: 'info', icon: '📦', text: `নতুন অর্ডার: "${order.productName || ''}" — ক্রেতা: ${order.buyerName || ''} (৳${order.totalAmount || 0})`, time: order.createdAt });
     });
 
     if (notifications.length === 0) {
-      container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem;">???? ???? ?????????? ???</p>';
+      container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem;">কোনো নতুন নোটিফিকেশন নেই</p>';
       return;
     }
 
     // Sort by time
     notifications.sort((a, b) => {
-      const ta = a.time?.toDate ? a.time.toDate() : new Date(0);
-      const tb = b.time?.toDate ? b.time.toDate() : new Date(0);
+      const ta = a.time?.toDate ? a.time.toDate() : new Date(a.time || 0);
+      const tb = b.time?.toDate ? b.time.toDate() : new Date(b.time || 0);
       return tb - ta;
     });
 
     container.innerHTML = notifications.map(n => {
-      const colors = { success: 'rgba(46,204,113,0.1)', error: 'rgba(231,76,60,0.1)', warning: 'rgba(243,156,18,0.1)', info: 'rgba(52,152,219,0.1)' };
-      return '<div style="padding:0.75rem;margin-bottom:0.5rem;background:' + (colors[n.type]||colors.info) + ';border-radius:8px;display:flex;align-items:center;gap:0.75rem;">' +
-        '<span style="font-size:1.5rem;">' + n.icon + '</span>' +
-        '<span>' + n.text + '</span></div>';
+      const colors = {
+        success: 'rgba(46,204,113,0.1)',
+        error: 'rgba(231,76,60,0.1)',
+        warning: 'rgba(243,156,18,0.1)',
+        info: 'rgba(52,152,219,0.1)'
+      };
+      return `
+        <div style="padding:0.85rem 1rem;margin-bottom:0.65rem;background:${colors[n.type] || colors.info};border-radius:10px;display:flex;align-items:center;gap:0.75rem;border:1px solid rgba(255,255,255,0.05);">
+          <span style="font-size:1.4rem;">${n.icon}</span>
+          <span style="font-size:0.95rem;">${n.text}</span>
+        </div>
+      `;
     }).join('');
 
   } catch(error) {
     console.error('Error loading notifications:', error);
-    container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem;">?????????? ??? ???? ??????</p>';
+    container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:2rem;">নোটিফিকেশন লোড করতে সমস্যা হয়েছে</p>';
   }
+}
+
+// ==========================================
+// QR Code Generation for Sellers
+// ==========================================
+
+function showProductQR(productId, productName) {
+  const url = `https://ghoroa.shop/#product-${productId}`;
+  renderQRModal(`প্রোডাক্ট QR কোড: ${productName}`, url, `QR-${productName}.png`);
+}
+
+function showShopQR() {
+  if (!currentUser) return;
+  const shopName = sellerProfile?.shopName || 'আমার দোকান';
+  const url = `https://ghoroa.shop/shop.html#${currentUser.uid}`;
+  renderQRModal(`দোকানের QR কোড: ${shopName}`, url, `QR-Shop-${shopName}.png`);
+}
+
+function renderQRModal(title, url, downloadFilename) {
+  const existing = document.getElementById('seller-qr-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'seller-qr-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(5px);';
+  overlay.innerHTML = `
+    <div style="background:var(--bg-card, #1a2332);color:var(--text, #fff);padding:2rem;border-radius:16px;text-align:center;max-width:380px;width:90%;border:1px solid var(--border, rgba(255,255,255,0.1));box-shadow:0 12px 35px rgba(0,0,0,0.5);">
+      <h3 style="margin-bottom:0.75rem;font-size:1.25rem;">${title}</h3>
+      <p style="color:var(--text-muted, #aaa);font-size:0.85rem;margin-bottom:1rem;">স্ক্যান করলে সরাসরি পেজটি ওপেন হবে</p>
+      <div id="seller-qr-box" style="background:#fff;padding:1rem;border-radius:12px;display:inline-block;margin-bottom:1rem;"></div>
+      <p style="color:var(--text-muted, #aaa);font-size:0.75rem;word-break:break-all;margin-bottom:1.25rem;">${url}</p>
+      <div style="display:flex;gap:0.75rem;justify-content:center;">
+        <button id="seller-qr-dl-btn" class="btn btn-primary btn-sm" style="padding:0.6rem 1.2rem;">📥 ডাউনলোড</button>
+        <button onclick="document.getElementById('seller-qr-overlay').remove()" class="btn btn-outline btn-sm" style="padding:0.6rem 1.2rem;">বন্ধ করুন</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  setTimeout(() => {
+    const box = document.getElementById('seller-qr-box');
+    if (box && typeof QRCode !== 'undefined') {
+      new QRCode(box, {
+        text: url,
+        width: 180,
+        height: 180,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      document.getElementById('seller-qr-dl-btn')?.addEventListener('click', () => {
+        const canvas = box.querySelector('canvas');
+        if (canvas) {
+          const a = document.createElement('a');
+          a.download = downloadFilename;
+          a.href = canvas.toDataURL('image/png');
+          a.click();
+        }
+      });
+    } else if (box) {
+      box.innerHTML = '<p style="color:red;padding:1rem;">QR কোড লাইব্রেরি পাওয়া যায়নি</p>';
+    }
+  }, 100);
 }

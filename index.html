@@ -240,6 +240,7 @@
         <li><a href="#products">প্রোডাক্ট</a></li>
         <li><a href="#areas">এলাকা</a></li>
         <li><a href="#open-shop" class="nav-cta">দোকান খুলুন</a></li>
+        <li><a href="seller.html" class="nav-seller-btn">🏪 সেলার লগইন</a></li>
       </ul>
 
       <div class="nav-actions">
@@ -266,6 +267,7 @@
         <li><a href="#products">প্রোডাক্ট</a></li>
         <li><a href="#areas">এলাকা</a></li>
         <li><a href="#open-shop" class="nav-cta">দোকান খুলুন</a></li>
+        <li><a href="seller.html" class="nav-seller-btn" style="border:1px solid var(--primary);display:inline-block;padding:0.5rem 1rem;border-radius:8px;margin-top:0.25rem;">🏪 সেলার লগইন</a></li>
       </ul>
     </div>
   </nav>
@@ -445,17 +447,48 @@
           </div>
           <div class="review-section" style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
-              <h4 style="margin:0;">⭐ রিভিউ</h4>
-              <button onclick="submitReview(document.getElementById('modal-title')?.dataset?.productId)" class="btn btn-secondary" style="font-size:0.85rem;padding:0.4rem 0.8rem;">✍️ রিভিউ দিন</button>
+              <h4 style="margin:0;">⭐ কাস্টমার রিভিউ</h4>
+              <button id="toggle-review-btn" onclick="toggleReviewForm()" class="btn btn-secondary" style="font-size:0.85rem;padding:0.4rem 0.8rem;">✍️ রিভিউ দিন</button>
             </div>
+            
+            <!-- In-Modal Review Form -->
+            <form id="review-form" style="display:none;margin-bottom:1rem;padding:1rem;background:rgba(255,255,255,0.04);border-radius:10px;border:1px solid var(--border);" onsubmit="handleReviewSubmit(event)">
+              <div style="margin-bottom:0.75rem;">
+                <label style="display:block;font-size:0.85rem;margin-bottom:0.25rem;color:var(--text-muted);">আপনার নাম *</label>
+                <input type="text" id="review-user-name" required placeholder="আপনার নাম লিখুন" style="width:100%;padding:0.5rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+              </div>
+              <div style="margin-bottom:0.75rem;">
+                <label style="display:block;font-size:0.85rem;margin-bottom:0.25rem;color:var(--text-muted);">রেটিং (১-৫) *</label>
+                <div id="star-rating-select" style="display:flex;gap:0.35rem;font-size:1.5rem;cursor:pointer;color:#f39c12;">
+                  <span data-star="1" onclick="setReviewRating(1)">★</span>
+                  <span data-star="2" onclick="setReviewRating(2)">★</span>
+                  <span data-star="3" onclick="setReviewRating(3)">★</span>
+                  <span data-star="4" onclick="setReviewRating(4)">★</span>
+                  <span data-star="5" onclick="setReviewRating(5)">★</span>
+                </div>
+                <input type="hidden" id="review-rating-val" value="5">
+              </div>
+              <div style="margin-bottom:0.75rem;">
+                <label style="display:block;font-size:0.85rem;margin-bottom:0.25rem;color:var(--text-muted);">আপনার মন্তব্য *</label>
+                <textarea id="review-user-text" required rows="2" placeholder="পণ্যটি আপনার কেমন লেগেছে?" style="width:100%;padding:0.5rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);"></textarea>
+              </div>
+              <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="toggleReviewForm(false)" style="font-size:0.85rem;">বাতিল</button>
+                <button type="submit" class="btn btn-primary" id="submit-review-btn" style="font-size:0.85rem;">জমা দিন</button>
+              </div>
+            </form>
+
             <div id="modal-reviews"><p style="color:var(--text-muted);">রিভিউ লোড হচ্ছে...</p></div>
           </div>
-          <div class="modal-actions">
-            <a href="#" class="btn btn-success btn-lg" id="modal-whatsapp" target="_blank" rel="noopener">
-              💬 WhatsApp-এ অর্ডার করুন
+          <div class="modal-actions" style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:1.25rem;">
+            <button type="button" class="btn btn-primary btn-lg" id="modal-direct-order-btn" onclick="openOrderModal()" style="flex:1 1 100%;justify-content:center;">
+              🛍️ সরাসরি অর্ডার করুন
+            </button>
+            <a href="#" class="btn btn-success btn-lg" id="modal-whatsapp" target="_blank" rel="noopener" style="flex:1 1 45%;justify-content:center;">
+              💬 WhatsApp-এ অর্ডার
             </a>
-            <a href="#" class="btn btn-accent" id="modal-messenger" target="_blank" rel="noopener">
-              📩 Messenger-এ যোগাযোগ
+            <a href="#" class="btn btn-accent" id="modal-messenger" target="_blank" rel="noopener" style="flex:1 1 45%;justify-content:center;">
+              📩 মেসেঞ্জারে যোগাযোগ
             </a>
           </div>
           <div class="payment-methods" style="margin-top:1rem;padding:1rem;background:var(--surface-2, rgba(255,255,255,0.05));border-radius:12px;border:1px solid var(--border);">
@@ -485,6 +518,78 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ===================== DIRECT ORDER MODAL ===================== -->
+  <div class="modal-overlay" id="order-modal" style="display:none;">
+    <div class="modal-content glass" style="max-width:520px;padding:2rem;">
+      <button class="modal-close" onclick="closeOrderModal()" aria-label="বন্ধ করুন">✕</button>
+      <div class="order-modal-header" style="text-align:center;margin-bottom:1.5rem;">
+        <span style="font-size:2.5rem;display:inline-block;margin-bottom:0.25rem;">🛍️</span>
+        <h2 style="font-size:1.6rem;margin-bottom:0.25rem;">সহজ অর্ডার</h2>
+        <p style="color:var(--text-muted);font-size:0.95rem;">পণ্যটি পেতে নিচের প্রয়োজনীয় তথ্যগুলো পূরণ করুন</p>
+      </div>
+
+      <div id="order-product-summary" style="display:flex;gap:1rem;align-items:center;background:rgba(255,255,255,0.05);padding:0.75rem 1rem;border-radius:10px;margin-bottom:1.25rem;border:1px solid var(--border);">
+        <img id="order-summary-img" src="" alt="" style="width:55px;height:55px;border-radius:8px;object-fit:cover;">
+        <div style="flex:1;">
+          <h4 id="order-summary-title" style="margin:0 0 0.25rem 0;font-size:1.05rem;">পণ্য</h4>
+          <span id="order-summary-price" style="color:var(--primary-light);font-weight:bold;font-size:1.1rem;">৳ 0</span>
+        </div>
+      </div>
+
+      <form id="direct-order-form" onsubmit="handleDirectOrderSubmit(event)">
+        <input type="hidden" id="order-product-id">
+        <input type="hidden" id="order-seller-id">
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label style="display:block;margin-bottom:0.35rem;font-weight:500;">আপনার নাম *</label>
+          <input type="text" id="order-buyer-name" required placeholder="যেমন: ফারহানা করিম" style="width:100%;padding:0.65rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+        </div>
+        <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+          <div class="form-group">
+            <label style="display:block;margin-bottom:0.35rem;font-weight:500;">মোবাইল নম্বর *</label>
+            <input type="tel" id="order-buyer-phone" required placeholder="01XXXXXXXXX" style="width:100%;padding:0.65rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+          </div>
+          <div class="form-group">
+            <label style="display:block;margin-bottom:0.35rem;font-weight:500;">পরিমাণ (সংখ্যা) *</label>
+            <input type="number" id="order-quantity" value="1" min="1" max="50" required onchange="updateOrderTotal()" style="width:100%;padding:0.65rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label style="display:block;margin-bottom:0.35rem;font-weight:500;">এলাকা / থানা *</label>
+          <select id="order-buyer-area" required style="width:100%;padding:0.65rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+            <option value="">এলাকা নির্বাচন করুন</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label style="display:block;margin-bottom:0.35rem;font-weight:500;">ডেলিভারির সম্পূর্ণ ঠিকানা *</label>
+          <textarea id="order-buyer-address" required rows="2" placeholder="বাড়ি/রোড/ফ্ল্যাট নম্বর বা এলাকার ল্যান্ডমার্ক..." style="width:100%;padding:0.65rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label style="display:block;margin-bottom:0.35rem;font-weight:500;">পেমেন্ট পদ্ধতি</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+            <label style="display:flex;align-items:center;gap:0.5rem;padding:0.6rem;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:rgba(255,255,255,0.03);">
+              <input type="radio" name="order-payment" value="cod" checked>
+              <span>🤝 ক্যাশ অন ডেলিভারি</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:0.5rem;padding:0.6rem;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:rgba(255,255,255,0.03);">
+              <input type="radio" name="order-payment" value="bkash">
+              <span>📱 বিকাশ / নগদ</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 0;border-top:1px solid var(--border);margin-bottom:1.25rem;">
+          <span style="font-size:1.1rem;font-weight:600;">সর্বমোট মূল্য:</span>
+          <span id="order-total-amount" style="font-size:1.3rem;font-weight:bold;color:var(--accent);">৳ 0</span>
+        </div>
+
+        <div style="display:flex;gap:0.75rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeOrderModal()" style="flex:1;">বাতিল</button>
+          <button type="submit" id="order-submit-btn" class="btn btn-primary" style="flex:2;">✅ অর্ডার নিশ্চিত করুন</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -764,7 +869,7 @@
             <div class="payment-badge" style="background:linear-gradient(135deg,#2ecc71,#27ae60);color:white;padding:0.4rem 0.75rem;border-radius:8px;font-weight:600;font-size:0.8rem;">🤝 ক্যাশ</div>
           </div>
           <h4 style="margin-top: 1.5rem;">যোগাযোগ</h4>
-          <p>📧 hello@ghoroa.com</p>
+          <p>📧 hello@ghoroa.shop</p>
           <p>📞 ০১৭XX-XXXXXX</p>
         </div>
       </div>
