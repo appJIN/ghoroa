@@ -177,7 +177,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTheme();
   initMobileMenu();
   initSmoothScroll();
-  initScrollAnimations();
   initNavbarScroll();
   initSearch();
 
@@ -191,6 +190,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderTestimonials();
   renderFAQs();
   renderFilterButtons();
+
+  initScrollAnimations();
 
   initCountdown();
   initCounterAnimation();
@@ -565,7 +566,7 @@ function renderFAQs() {
   if (!list) return;
 
   list.innerHTML = FAQS.map((faq, i) => `
-    <div class="faq-item glass animate-on-scroll">
+    <div class="faq-item glass animate-on-scroll visible">
       <button class="faq-question" onclick="toggleFAQ(this)" aria-expanded="false">
         <span>${faq.q}</span>
         <span class="faq-icon">+</span>
@@ -575,6 +576,7 @@ function renderFAQs() {
       </div>
     </div>
   `).join('');
+  initScrollAnimations();
 }
 
 function toggleFAQ(btn) {

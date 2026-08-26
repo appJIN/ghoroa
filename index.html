@@ -60,6 +60,8 @@
         "contactPoint": {
           "@type": "ContactPoint",
           "contactType": "customer service",
+          "telephone": "+8801534310931",
+          "email": "ghoroa.hmmp@gmail.com",
           "availableLanguage": "Bengali"
         }
       },
@@ -239,6 +241,7 @@
         <li><a href="#haat">হাটবার</a></li>
         <li><a href="#products">প্রোডাক্ট</a></li>
         <li><a href="#areas">এলাকা</a></li>
+        <li><a href="#faq">❓ প্রশ্নোত্তর</a></li>
         <li><a href="#open-shop" class="nav-cta">দোকান খুলুন</a></li>
         <li><a href="seller.html" class="nav-seller-btn">🏪 সেলার লগইন</a></li>
       </ul>
@@ -266,6 +269,7 @@
         <li><a href="#haat">হাটবার</a></li>
         <li><a href="#products">প্রোডাক্ট</a></li>
         <li><a href="#areas">এলাকা</a></li>
+        <li><a href="#faq">❓ প্রশ্নোত্তর</a></li>
         <li><a href="#open-shop" class="nav-cta">দোকান খুলুন</a></li>
         <li><a href="seller.html" class="nav-seller-btn" style="border:1px solid var(--primary);display:inline-block;padding:0.5rem 1rem;border-radius:8px;margin-top:0.25rem;">🏪 সেলার লগইন</a></li>
       </ul>
@@ -793,13 +797,75 @@
   <!-- ===================== FAQ ===================== -->
   <section id="faq" class="section section-alt">
     <div class="container">
-      <div class="section-header animate-on-scroll">
+      <div class="section-header animate-on-scroll visible">
         <span class="section-tag">❓ প্রশ্নোত্তর</span>
         <h2 class="section-title">সচরাচর জিজ্ঞাসা</h2>
         <p class="section-subtitle">আপনার মনে যেসব প্রশ্ন আসতে পারে</p>
       </div>
       <div class="faq-list" id="faq-list">
-        <!-- Rendered by JavaScript -->
+        <div class="faq-item glass animate-on-scroll visible">
+          <button class="faq-question" onclick="toggleFAQ(this)" aria-expanded="false">
+            <span>ঘরোয়ায় দোকান খুলতে কত খরচ?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>সম্পূর্ণ ফ্রি! কোনো রেজিস্ট্রেশন ফি, মাসিক চার্জ বা কমিশন নেই। আপনি যা বিক্রি করবেন, পুরো টাকাটাই আপনার।</p>
+          </div>
+        </div>
+        <div class="faq-item glass animate-on-scroll visible">
+          <button class="faq-question" onclick="toggleFAQ(this)" aria-expanded="false">
+            <span>কীভাবে পেমেন্ট নেব?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>বিকাশ, নগদ, রকেট — যেকোনো মোবাইল ব্যাংকিং-এ সরাসরি পেমেন্ট নিতে পারবেন। ক্যাশ অন ডেলিভারিও সাপোর্ট করি।</p>
+          </div>
+        </div>
+        <div class="faq-item glass animate-on-scroll visible">
+          <button class="faq-question" onclick="toggleFAQ(this)" aria-expanded="false">
+            <span>ডেলিভারি কীভাবে হবে?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>আপনার এলাকায় নিজে ডেলিভারি দিতে পারেন (ফ্রি), অথবা আমাদের পার্টনার — পাঠাও, রেডএক্স, স্টেডফাস্ট-এর মাধ্যমে সারা ঢাকায় ডেলিভারি দিতে পারবেন।</p>
+          </div>
+        </div>
+        <div class="faq-item glass animate-on-scroll visible">
+          <button class="faq-question" onclick="toggleFAQ(this)" aria-expanded="false">
+            <span>কী কী প্রোডাক্ট বিক্রি করতে পারব?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>ঘরে তৈরি খাবার, হস্তশিল্প, পোশাক, আর্ট, প্রাকৃতিক প্রোডাক্ট, কাস্টম গিফট — যেকোনো হোমমেড বা হ্যান্ডমেড প্রোডাক্ট বিক্রি করতে পারবেন।</p>
+          </div>
+        </div>
+        <div class="faq-item glass animate-on-scroll visible">
+          <button class="faq-question" onclick="toggleFAQ(this)" aria-expanded="false">
+            <span>"হাটবার" কী?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>হাটবার হলো আমাদের ইউনিক ফিচার — নির্দিষ্ট দিনে ও সময়ে আপনি একটি "ফ্ল্যাশ হাট" বসাতে পারবেন। যেমন "প্রতি শুক্রবার পিঠার হাট"। এতে কাস্টমারদের মধ্যে excitement তৈরি হয়, বিক্রি বাড়ে।</p>
+          </div>
+        </div>
+        <div class="faq-item glass animate-on-scroll visible">
+          <button class="faq-question" onclick="toggleFAQ(this)" aria-expanded="false">
+            <span>আমি কি একাধিক ক্যাটাগরিতে প্রোডাক্ট রাখতে পারব?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>অবশ্যই! আপনি একই দোকানে যত খুশি ক্যাটাগরিতে প্রোডাক্ট রাখতে পারবেন।</p>
+          </div>
+        </div>
+        <div class="faq-item glass animate-on-scroll visible">
+          <button class="faq-question" onclick="toggleFAQ(this)" aria-expanded="false">
+            <span>ঘরোয়া কি শুধু ঢাকার জন্য?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>আপাতত ঢাকার সব এলাকায় সার্ভিস দিচ্ছি। শীঘ্রই চট্টগ্রাম, সিলেট, রাজশাহীসহ সারা বাংলাদেশে সম্প্রসারিত হবে।</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -807,12 +873,12 @@
   <!-- ===================== CTA BANNER ===================== -->
   <section class="cta-banner">
     <div class="container">
-      <div class="cta-content animate-on-scroll">
+      <div class="cta-content animate-on-scroll visible">
         <h2>আজই শুরু করুন আপনার হোম বিজনেস! 🚀</h2>
         <p>হাজার হাজার সেলার ইতিমধ্যে ঘরোয়ায় সফলভাবে বিক্রি করছেন। আপনিও যোগ দিন!</p>
         <div class="cta-buttons">
           <a href="#open-shop" class="btn btn-accent btn-lg">দোকান খুলুন — ফ্রি</a>
-          <a href="https://wa.me/8801XXXXXXXXX?text=ঘরোয়া সম্পর্কে জানতে চাই" class="btn btn-secondary btn-lg" target="_blank" rel="noopener">💬 আমাদের সাথে কথা বলুন</a>
+          <a href="https://wa.me/8801534310931?text=ঘরোয়া সম্পর্কে জানতে চাই" class="btn btn-secondary btn-lg" target="_blank" rel="noopener">💬 আমাদের সাথে কথা বলুন</a>
         </div>
       </div>
     </div>
@@ -869,8 +935,8 @@
             <div class="payment-badge" style="background:linear-gradient(135deg,#2ecc71,#27ae60);color:white;padding:0.4rem 0.75rem;border-radius:8px;font-weight:600;font-size:0.8rem;">🤝 ক্যাশ</div>
           </div>
           <h4 style="margin-top: 1.5rem;">যোগাযোগ</h4>
-          <p>📧 hello@ghoroa.shop</p>
-          <p>📞 ০১৭XX-XXXXXX</p>
+          <p>📧 <a href="mailto:ghoroa.hmmp@gmail.com" style="color:inherit;text-decoration:none;">ghoroa.hmmp@gmail.com</a></p>
+          <p>📞 <a href="tel:01534310931" style="color:inherit;text-decoration:none;">০১৫৩৪-৩১০৯৩১</a></p>
         </div>
       </div>
 
