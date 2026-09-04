@@ -37,7 +37,8 @@
   font-weight: 500;
 }
 
-.status-badge.approved {
+.status-badge.approved,
+.status-badge.delivered {
   background-color: rgba(46, 204, 113, 0.15);
   color: var(--success);
 }
@@ -47,7 +48,13 @@
   color: var(--warning);
 }
 
-.status-badge.rejected {
+.status-badge.shipped {
+  background-color: rgba(52, 152, 219, 0.15);
+  color: var(--info, #3498db);
+}
+
+.status-badge.rejected,
+.status-badge.cancelled {
   background-color: rgba(231, 76, 60, 0.15);
   color: var(--danger);
 }

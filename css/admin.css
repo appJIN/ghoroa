@@ -943,9 +943,11 @@ select.form-control {
     transform: translateX(-100%);
   }
   
-  .sidebar.show {
+  .sidebar.show,
+  .sidebar.open {
     transform: translateX(0);
     box-shadow: var(--shadow-lg);
+    z-index: 999;
   }
   
   .main-content {

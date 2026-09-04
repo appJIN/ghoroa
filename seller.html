@@ -93,6 +93,13 @@
             </a>
           </li>
           <li>
+            <a href="#" class="nav-item" data-tab="my-orders">
+              <span class="nav-icon">📋</span>
+              <span>অর্ডার খাতা</span>
+              <span class="badge-counter" id="orders-badge-count" style="display:none;background:var(--danger);color:#fff;font-size:0.75rem;padding:0.15rem 0.45rem;border-radius:10px;margin-left:auto;">0</span>
+            </a>
+          </li>
+          <li>
             <a href="#" class="nav-item" data-tab="my-products">
               <span class="nav-icon">📦</span>
               <span>আমার প্রোডাক্ট</span>
@@ -102,6 +109,12 @@
             <a href="#" class="nav-item" data-tab="my-shop">
               <span class="nav-icon">🏠</span>
               <span>দোকান সেটিংস</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="nav-item" data-tab="my-haats">
+              <span class="nav-icon">🏪</span>
+              <span>আমার হাটবার</span>
             </a>
           </li>
         </ul>
@@ -156,6 +169,13 @@
                 <span class="stat-label">মোট ভিউ</span>
               </div>
             </div>
+            <div class="stat-card glass">
+              <div class="stat-icon" style="background-color:rgba(155,89,182,0.2);">📋</div>
+              <div class="stat-info">
+                <span class="stat-value" id="stat-orders">0</span>
+                <span class="stat-label">মোট অর্ডার</span>
+              </div>
+            </div>
           </div>
 
           <div class="card">
@@ -181,6 +201,20 @@
             </button>
           </div>
 
+          <!-- Product Search & Filter Toolbar -->
+          <div class="card" style="margin-bottom:1rem;padding:0.75rem 1rem;">
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;">
+              <div style="flex:1;min-width:200px;">
+                <input type="text" id="seller-product-search" class="form-control" placeholder="🔍 প্রোডাক্টের নাম বা বিবরণ দিয়ে খুঁজুন...">
+              </div>
+              <div style="width:200px;">
+                <select id="seller-product-cat-filter" class="form-control">
+                  <option value="all">সব ক্যাটাগরি</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
           <div class="card">
             <div class="table-responsive">
               <table class="data-table">
@@ -188,14 +222,59 @@
                   <tr>
                     <th>ছবি</th>
                     <th>নাম</th>
-                    <th>দাম</th>
+                    <th>দাম ও ইউনিট</th>
                     <th>ক্যাটাগরি</th>
+                    <th>স্টক</th>
                     <th>স্ট্যাটাস</th>
                     <th>অ্যাকশন</th>
                   </tr>
                 </thead>
                 <tbody id="products-table-body">
-                  <tr><td colspan="6" class="text-center py-4">কোনো প্রোডাক্ট পাওয়া যায়নি</td></tr>
+                  <tr><td colspan="7" class="text-center py-4">কোনো প্রোডাক্ট পাওয়া যায়নি</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== MY ORDERS TAB ==================== -->
+      <div class="tab-content" data-tab="my-orders" style="display:none;">
+        <div class="content-area">
+          <div class="tab-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+            <h3>📋 অর্ডার খাতা ও কাস্টমার ম্যানেজমেন্ট</h3>
+            <button id="add-order-btn" class="btn btn-primary">
+              ➕ নতুন অর্ডার রেকর্ড করুন
+            </button>
+          </div>
+
+          <!-- Orders Filter Toolbar -->
+          <div class="card" style="margin-bottom:1rem;padding:0.75rem 1rem;">
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+              <button class="order-filter-btn btn btn-sm btn-primary active" data-status="all">সব (<span id="count-all-orders">0</span>)</button>
+              <button class="order-filter-btn btn btn-sm btn-outline" data-status="pending">⏳ পেন্ডিং (<span id="count-pending-orders">0</span>)</button>
+              <button class="order-filter-btn btn btn-sm btn-outline" data-status="shipped">🚚 পাঠানো হয়েছে (<span id="count-shipped-orders">0</span>)</button>
+              <button class="order-filter-btn btn btn-sm btn-outline" data-status="delivered">✅ সফল (<span id="count-delivered-orders">0</span>)</button>
+              <button class="order-filter-btn btn btn-sm btn-outline" data-status="cancelled">❌ বাতিল (<span id="count-cancelled-orders">0</span>)</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>অর্ডার তারিখ</th>
+                    <th>ক্রেতার নাম ও ফোন</th>
+                    <th>পণ্য ও পরিমাণ</th>
+                    <th>মোট মূল্য</th>
+                    <th>ঠিকানা</th>
+                    <th>স্ট্যাটাস</th>
+                    <th>অ্যাকশন</th>
+                  </tr>
+                </thead>
+                <tbody id="orders-table-body">
+                  <tr><td colspan="7" class="text-center py-4">কোনো অর্ডার রেকর্ড নেই</td></tr>
                 </tbody>
               </table>
             </div>
@@ -207,36 +286,148 @@
       <div class="tab-content" data-tab="my-shop">
         <div class="content-area">
           <div class="tab-header">
-            <h3>🏠 দোকান সেটিংস</h3>
+            <h3>🏠 দোকান সেটিংস ও প্রোফাইল</h3>
           </div>
+
+          <!-- Shareable Shop Link Card -->
+          <div class="card" style="margin-bottom:1.5rem;background:linear-gradient(135deg,rgba(46,204,113,0.1),rgba(52,152,219,0.1));border:1px solid rgba(46,204,113,0.3);">
+            <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+              <div>
+                <h4 style="margin:0 0 0.35rem 0;color:var(--primary);">📱 আপনার শেয়ারেবল দোকান পেজ লিংক</h4>
+                <p style="margin:0;font-size:0.9rem;color:var(--text-muted);word-break:break-all;" id="shop-url-display">লোড হচ্ছে...</p>
+              </div>
+              <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <button type="button" class="btn btn-primary btn-sm" id="copy-shop-url-btn">📋 লিংক কপি করুন</button>
+                <a href="#" target="_blank" class="btn btn-outline btn-sm" id="visit-shop-url-btn">👀 দোকান দেখুন</a>
+              </div>
+            </div>
+          </div>
+
           <div class="card">
             <div class="card-body">
               <form id="shop-settings-form">
+                <h4 style="margin-top:0;margin-bottom:1rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem;">기 মৌলিক তথ্য</h4>
                 <div class="form-row">
                   <div class="form-group">
-                    <label>দোকানের নাম</label>
-                    <input type="text" id="shop-name" class="form-control">
+                    <label>দোকানের নাম *</label>
+                    <input type="text" id="shop-name" class="form-control" required>
                   </div>
                   <div class="form-group">
-                    <label>ফোন নম্বর</label>
-                    <input type="tel" id="shop-phone" class="form-control">
+                    <label>ফোন / WhatsApp নম্বর *</label>
+                    <input type="tel" id="shop-phone" class="form-control" required placeholder="01XXXXXXXXX">
                   </div>
                 </div>
                 <div class="form-row">
                   <div class="form-group">
-                    <label>এলাকা</label>
-                    <select id="shop-area" class="form-control">
+                    <label>এলাকা *</label>
+                    <select id="shop-area" class="form-control" required>
                       <option value="">এলাকা নির্বাচন করুন</option>
                     </select>
                   </div>
                 </div>
                 <div class="form-group">
-                  <label>আপনার গল্প</label>
-                  <textarea id="shop-story" class="form-control" rows="4"></textarea>
+                  <label>দোকানের গল্প ও পরিচিতি</label>
+                  <textarea id="shop-story" class="form-control" rows="3" placeholder="আপনার হাতের রান্নার বা পণ্যের গল্প ক্রেতাদের বলুন..."></textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">💾 সেভ করুন</button>
+
+                <h4 style="margin-top:1.5rem;margin-bottom:1rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem;">🎨 শপ ব্র্যান্ডিং ও সোশ্যাল লিংক</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>দোকানের লোগো ছবি URL / লিংক</label>
+                    <input type="url" id="shop-logo" class="form-control" placeholder="যেমন: https://example.com/logo.jpg">
+                  </div>
+                  <div class="form-group">
+                    <label>দোকানের কভার ব্যানার ছবি URL</label>
+                    <input type="url" id="shop-cover" class="form-control" placeholder="যেমন: https://example.com/cover.jpg">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>ফেসবুক পেজ লিংক (Facebook Page)</label>
+                    <input type="url" id="shop-facebook" class="form-control" placeholder="যেমন: https://facebook.com/yourkitchen">
+                  </div>
+                  <div class="form-group">
+                    <label>ইনস্টাগ্রাম প্রোফাইল লিংক (Instagram)</label>
+                    <input type="url" id="shop-instagram" class="form-control" placeholder="যেমন: https://instagram.com/yourkitchen">
+                  </div>
+                </div>
+
+                <h4 style="margin-top:1.5rem;margin-bottom:1rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem;">💳 পেমেন্ট তথ্য (ক্রেতাদের থেকে সরাসরি টাকা গ্রহণের জন্য)</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>বিকাশ নম্বর (Personal / Merchant)</label>
+                    <input type="tel" id="shop-bkash" class="form-control" placeholder="01XXXXXXXXX">
+                  </div>
+                  <div class="form-group">
+                    <label>নগদ নম্বর</label>
+                    <input type="tel" id="shop-nagad" class="form-control" placeholder="01XXXXXXXXX">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>রকেট নম্বর (ঐচ্ছিক)</label>
+                    <input type="tel" id="shop-rocket" class="form-control" placeholder="01XXXXXXXXX">
+                  </div>
+                </div>
+
+                <h4 style="margin-top:1.5rem;margin-bottom:1rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem;">🚚 ডেলিভারি ও পিক-আপ তথ্য</h4>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>নিজস্ব ডেলিভারি চার্জ (৳)</label>
+                    <input type="number" id="shop-delivery-charge" class="form-control" placeholder="যেমন: ৬০">
+                  </div>
+                  <div class="form-group">
+                    <label>ডেলিভারির নিয়ম বা এলাকা</label>
+                    <input type="text" id="shop-delivery-info" class="form-control" placeholder="যেমন: নিজস্ব এলাকায় ৬০ টাকা, সারা ঢাকায় পার্সেল ১২০ টাকা">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+                    <input type="checkbox" id="shop-pickup-available" style="width:18px;height:18px;">
+                    <span>সেলফ পিক-আপ সুবিধা আছে (ক্রেতা সরাসরি এসে পণ্য গ্রহণ করতে পারবেন)</span>
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label>বিস্তারিত পিক-আপ ঠিকানা / ল্যান্ডমার্ক</label>
+                  <input type="text" id="shop-address" class="form-control" placeholder="যেমন: বাড়ি # ১২, রোড # ৫, ব্লক সি, বনশ্রী, ঢাকা (পিক-আপের জন্য)">
+                </div>
+
+                <div style="margin-top:1.5rem;">
+                  <button type="submit" class="btn btn-primary btn-lg">💾 সেটিংস সেভ করুন</button>
+                </div>
               </form>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== MY HAATS TAB ==================== -->
+      <div class="tab-content" data-tab="my-haats">
+        <div class="content-area">
+          <div class="tab-header">
+            <h3>🏪 আমার হাটবার</h3>
+            <button id="add-haat-btn" class="btn btn-primary">➕ নতুন হাটবার</button>
+          </div>
+          <div class="card">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>শিরোনাম</th>
+                    <th>তারিখ</th>
+                    <th>পণ্য সংখ্যা</th>
+                    <th>স্ট্যাটাস</th>
+                    <th>অ্যাকশন</th>
+                  </tr>
+                </thead>
+                <tbody id="haats-table-body">
+                  <tr><td colspan="5" class="text-center py-4">কোনো হাটবার নেই</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div style="margin-top:1rem;padding:0.75rem;background:rgba(243,156,18,0.1);border-radius:8px;border:1px solid rgba(243,156,18,0.3);">
+            <small>⚠️ হাটবার তৈরির পর অ্যাডমিন অনুমোদন দিলে মেইন সাইটে দেখাবে।</small>
           </div>
         </div>
       </div>
@@ -257,18 +448,32 @@
           <div class="form-row">
             <div class="form-group">
               <label>প্রোডাক্টের নাম *</label>
-              <input type="text" id="product-name" class="form-control" required>
+              <input type="text" id="product-name" class="form-control" placeholder="যেমন: স্পেশাল আমের আচার" required>
             </div>
-            <div class="form-group">
-              <label>দাম (৳) *</label>
-              <input type="number" id="product-price" class="form-control" required>
-            </div>
-          </div>
-          <div class="form-row">
             <div class="form-group">
               <label>ক্যাটাগরি *</label>
               <select id="product-category" class="form-control" required>
                 <option value="">নির্বাচন করুন</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>দাম (৳) *</label>
+              <input type="number" id="product-price" class="form-control" placeholder="যেমন: ৩৫০" required>
+            </div>
+            <div class="form-group">
+              <label>পরিমাপ / ইউনিট</label>
+              <input type="text" id="product-unit" class="form-control" placeholder="যেমন: ৫০০ গ্রাম, ১ কেজি, ১২ পিস, ১ সেট">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>স্টক অবস্থা *</label>
+              <select id="product-stock-status" class="form-control">
+                <option value="in_stock">✅ ইন স্টক (সরাসরি রেডি)</option>
+                <option value="made_to_order">⏳ অর্ডারে তৈরি (প্রি-অর্ডার)</option>
+                <option value="out_of_stock">❌ স্টক শেষ (Out of Stock)</option>
               </select>
             </div>
             <div class="form-group">
@@ -277,14 +482,16 @@
                 <option value="">কোনো ব্যাজ নেই</option>
                 <option value="নতুন">নতুন</option>
                 <option value="জনপ্রিয়">জনপ্রিয়</option>
-                <option value="সীমিত">সীমিত স্টক</option>
                 <option value="স্পেশাল">স্পেশাল</option>
+                <option value="অর্গানিক">অর্গানিক</option>
+                <option value="হ্যান্ডমেড">হ্যান্ডমেড</option>
+                <option value="সীমিত">সীমিত স্টক</option>
               </select>
             </div>
           </div>
           <div class="form-group">
-            <label>গল্প / বর্ণনা *</label>
-            <textarea id="product-story" class="form-control" rows="3" required></textarea>
+            <label>গল্প / পণ্যের বর্ণনা *</label>
+            <textarea id="product-story" class="form-control" rows="3" placeholder="পণ্যটি তৈরির প্রক্রিয়া বা বৈশিষ্ট্য..." required></textarea>
           </div>
           <div class="form-group">
             <label>প্রোডাক্ট ছবি</label>
@@ -301,6 +508,104 @@
           <div class="form-actions">
             <button type="button" id="cancel-btn" class="btn btn-outline">বাতিল</button>
             <button type="submit" class="btn btn-primary">💾 সেভ করুন</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== HAAT MODAL ==================== -->
+  <div id="haat-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="haat-modal-title">নতুন হাটবার তৈরি করুন</h3>
+        <button id="close-haat-modal-btn" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="haat-form">
+          <input type="hidden" id="haat-id">
+          <div class="form-group">
+            <label>হাটবারের শিরোনাম *</label>
+            <input type="text" id="haat-title" class="form-control" placeholder="যেমন: পিঠা উৎসব" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>তারিখ *</label>
+              <input type="date" id="haat-date" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>পণ্য সংখ্যা</label>
+              <input type="number" id="haat-products-count" class="form-control" value="0" min="0">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>বিবরণ *</label>
+            <textarea id="haat-description" class="form-control" rows="3" placeholder="হাটবারে কী কী পাওয়া যাবে..." required></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="button" id="cancel-haat-btn" class="btn btn-outline">বাতিল</button>
+            <button type="submit" class="btn btn-primary">💾 সেভ করুন</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  <!-- ==================== ORDER MODAL ==================== -->
+  <div id="order-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:550px;">
+      <div class="modal-header">
+        <h3 id="order-modal-title">নতুন অর্ডার রেকর্ড করুন</h3>
+        <button id="close-order-modal-btn" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="order-form">
+          <input type="hidden" id="order-id">
+          <div class="form-row">
+            <div class="form-group">
+              <label>ক্রেতার নাম *</label>
+              <input type="text" id="order-customer-name" class="form-control" required placeholder="যেমন: সাজিদ হাসান">
+            </div>
+            <div class="form-group">
+              <label>ক্রেতার ফোন নম্বর *</label>
+              <input type="tel" id="order-customer-phone" class="form-control" required placeholder="01XXXXXXXXX">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>পণ্যের নাম ও বিবরণ *</label>
+              <input type="text" id="order-product-name" class="form-control" required placeholder="যেমন: আমের আচার (২ কেজি)">
+            </div>
+            <div class="form-group">
+              <label>মোট মূল্য (৳) *</label>
+              <input type="number" id="order-total-price" class="form-control" required placeholder="৭০০">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>ডেলিভারির পূর্ণাঙ্গ ঠিকানা *</label>
+            <textarea id="order-customer-address" class="form-control" rows="2" required placeholder="বাড়ি, রোড, এলাকা, জেলা..."></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>পেমেন্ট মেথড</label>
+              <select id="order-payment-method" class="form-control">
+                <option value="Cash on Delivery">ক্যাশ অন ডেলিভারি (COD)</option>
+                <option value="bKash">বিকাশ (bKash)</option>
+                <option value="Nagad">নগদ (Nagad)</option>
+                <option value="Paid">পরিশোধিত</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>অর্ডার স্ট্যাটাস</label>
+              <select id="order-status" class="form-control">
+                <option value="pending">⏳ পেন্ডিং (নতুন)</option>
+                <option value="shipped">🚚 পাঠানো হয়েছে</option>
+                <option value="delivered">✅ সফলভাবে ডেলিভার্ড</option>
+                <option value="cancelled">❌ বাতিল</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" id="cancel-order-btn" class="btn btn-outline">বাতিল</button>
+            <button type="submit" class="btn btn-primary">💾 অর্ডার সেভ করুন</button>
           </div>
         </form>
       </div>

@@ -835,23 +835,53 @@ function renderHaatsTable(haats) {
     tbody.innerHTML = '';
     haats.forEach(haat => {
         const tr = document.createElement('tr');
-        const statusClass = haat.isLive ? 'color:var(--success);' : 'color:var(--text-muted);';
-        const statusText = haat.isLive ? '🟢 লাইভ' : '⚪ বন্ধ';
+        
+        // Status with approve/reject
+        let statusHtml = '';
+        if (haat.approved === true) {
+            statusHtml = haat.isLive 
+                ? '<span style="color:var(--success);">🟢 লাইভ</span>' 
+                : '<span style="color:var(--text-muted);">✅ অনুমোদিত</span>';
+        } else if (haat.approved === false) {
+            statusHtml = '<span style="color:var(--danger);">❌ প্রত্যাখ্যান</span>';
+        } else {
+            statusHtml = '<span style="color:var(--warning);">⏳ অনুমোদন বাকি</span>';
+        }
+
+        // Action buttons
+        let actionHtml = `
+            <button class="btn btn-sm btn-outline" onclick="openEditHaatModal('${haat.id}')">✏️</button>
+            <button class="btn btn-sm btn-outline" style="color:var(--danger);border-color:var(--danger);" onclick="deleteHaat('${haat.id}')">🗑️</button>
+        `;
+        
+        // Add approve/reject buttons for pending haats
+        if (haat.approved !== true) {
+            actionHtml = `
+                <button class="btn btn-sm btn-primary" onclick="approveHaat('${haat.id}')">✅ Approve</button>
+                ${actionHtml}
+            `;
+        }
+        if (haat.approved === true && !haat.isLive) {
+            actionHtml = `
+                <button class="btn btn-sm btn-outline" style="color:var(--success);border-color:var(--success);" onclick="toggleHaatLive('${haat.id}', true)">🔴 লাইভ</button>
+                ${actionHtml}
+            `;
+        }
+        if (haat.isLive) {
+            actionHtml = `
+                <button class="btn btn-sm btn-outline" onclick="toggleHaatLive('${haat.id}', false)">⚪ বন্ধ</button>
+                ${actionHtml}
+            `;
+        }
+
         tr.innerHTML = `
             <td><strong>${haat.title || ''}</strong></td>
             <td>${haat.seller || ''}</td>
             <td>${haat.area || ''}</td>
             <td>${formatDate(haat.date || haat.createdAt)}</td>
             <td>${haat.products || 0}টি</td>
-            <td><span style="${statusClass}">${statusText}</span></td>
-            <td>
-                <button class="btn btn-sm btn-outline" onclick="openEditHaatModal('${haat.id}')">
-                    ✏️ এডিট
-                </button>
-                <button class="btn btn-sm btn-outline" style="color:var(--danger);border-color:var(--danger);" onclick="deleteHaat('${haat.id}')">
-                    🗑️ ডিলিট
-                </button>
-            </td>
+            <td>${statusHtml}</td>
+            <td>${actionHtml}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -960,5 +990,33 @@ async function deleteHaat(haatId) {
     } catch (error) {
         console.error('Error deleting haat:', error);
         showToast('ডিলিট করতে সমস্যা', 'error');
+    }
+}
+
+async function approveHaat(haatId) {
+    try {
+        await db.collection('haats').doc(haatId).update({
+            approved: true,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showToast('হাটবার অনুমোদিত হয়েছে! ✅', 'success');
+        loadHaats();
+    } catch (error) {
+        console.error('Error approving haat:', error);
+        showToast('অনুমোদন করতে সমস্যা', 'error');
+    }
+}
+
+async function toggleHaatLive(haatId, isLive) {
+    try {
+        await db.collection('haats').doc(haatId).update({
+            isLive: isLive,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showToast(isLive ? 'হাটবার লাইভ হয়েছে! 🟢' : 'হাটবার বন্ধ হয়েছে ⚪', 'success');
+        loadHaats();
+    } catch (error) {
+        console.error('Error toggling haat:', error);
+        showToast('স্ট্যাটাস পরিবর্তন করতে সমস্যা', 'error');
     }
 }
