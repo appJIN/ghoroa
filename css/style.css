@@ -340,7 +340,7 @@ button { cursor: pointer; }
   pointer-events: none;
   transition: opacity 0.3s ease;
 }
-.mobile-menu.active { opacity: 1; pointer-events: all; }
+.mobile-menu.active { opacity: 1; pointer-events: all; display: block; }
 .mobile-menu ul { display: flex; flex-direction: column; gap: 0.5rem; }
 .mobile-menu ul li a {
   display: block;
