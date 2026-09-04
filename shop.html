@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="bn" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>দোকান — ঘরোয়া মার্কেটপ্লেস</title>
+  <meta name="description" content="ঘরোয়া ভেরিফায়েড হোমমেড সেলারের পাবলিক শপ পেজ — ঘরে তৈরি খাঁটি পণ্য সরাসরি অর্ডার করুন।">
+  <link rel="canonical" href="https://ghoroa.shop/shop.html">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .shop-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 0.75rem 0;
+    }
+    .shop-nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .seller-hero {
+      padding: 3rem 0 2rem 0;
+    }
+    .seller-header-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .seller-header-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+    }
+    .seller-avatar-wrapper {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      margin: 0 auto 1.25rem auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.75rem;
+      font-weight: bold;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: #fff;
+      border: 4px solid var(--bg-card);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .seller-avatar-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .shop-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+    .seller-sub {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      margin-bottom: 1rem;
+    }
+    .verified-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--success);
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    .seller-story-box {
+      max-width: 700px;
+      margin: 0 auto 1.5rem auto;
+      color: var(--text);
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+    .seller-actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .products-section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 3rem 0 1.5rem 0;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .loading-box {
+      text-align: center;
+      padding: 5rem 1rem;
+      font-size: 1.3rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="shop-nav">
+    <div class="container shop-nav-container">
+      <a href="index.html" class="nav-logo">
+        <span class="logo-icon">🏠</span>
+        <span class="logo-text">ঘরোয়া</span>
+      </a>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <a href="index.html" class="btn btn-secondary btn-sm">← মূল মার্কেটপ্লেস</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="থিম পরিবর্তন">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div id="loading" class="loading-box">
+      <span style="font-size:3rem;display:block;margin-bottom:1rem;">⏳</span>
+      দোকানের তথ্য লোড হচ্ছে...
+    </div>
+
+    <div id="shop-content" style="display: none;">
+      <!-- Seller Hero -->
+      <section class="seller-hero">
+        <div class="seller-header-card">
+          <div class="seller-avatar-wrapper" id="seller-avatar">👩🏽‍🍳</div>
+          <h1 class="shop-title" id="shop-name">লোড হচ্ছে...</h1>
+          <div class="seller-sub">
+            <span id="seller-name">বিক্রেতা</span>
+            <span>·</span>
+            <span id="seller-area">📍 এলাকা</span>
+            <span class="verified-badge">✓ ভেরিফায়েড সেলার</span>
+          </div>
+          <p class="seller-story-box" id="seller-story"></p>
+          <div class="seller-actions" id="seller-actions">
+            <a href="#" id="shop-whatsapp-btn" target="_blank" class="btn btn-success">
+              💬 WhatsApp-এ চ্যাট
+            </a>
+            <a href="#" id="shop-call-btn" class="btn btn-secondary">
+              📞 কল করুন
+            </a>
+            <button type="button" class="btn btn-outline" id="shop-share-btn" onclick="shareShop()">
+              🔗 দোকান শেয়ার করুন
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Products Grid -->
+      <section style="padding-bottom: 4rem;">
+        <div class="products-section-title">
+          <h2>সকল হোমমেড পণ্য (<span id="products-count">০</span>)</h2>
+        </div>
+        <div class="product-grid" id="products-grid">
+          <!-- Products will be injected here -->
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Product Modal -->
+  <div class="modal-overlay" id="product-modal" style="display:none;">
+    <div class="modal-content glass" style="max-width:560px;">
+      <button class="modal-close" onclick="closeProductModal()" aria-label="বন্ধ করুন">✕</button>
+      <div class="modal-body" style="display:block;">
+        <img id="modal-img" src="" alt="" style="width:100%;height:280px;object-fit:cover;border-radius:12px;margin-bottom:1rem;">
+        <h2 id="modal-title" style="margin-bottom:0.5rem;font-size:1.6rem;"></h2>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <span id="modal-price" style="font-size:1.5rem;font-weight:700;color:var(--accent);"></span>
+          <span id="modal-badge" class="product-badge" style="position:static;"></span>
+        </div>
+        <p id="modal-story" style="color:var(--text-muted);font-size:1rem;margin-bottom:1.5rem;line-height:1.6;"></p>
+        <div style="display:flex;flex-wrap:wrap;gap:0.75rem;">
+          <button type="button" class="btn btn-primary btn-lg" style="flex:1 1 100%;justify-content:center;" onclick="openOrderFromShopModal()">
+            🛍️ সরাসরি অর্ডার করুন
+          </button>
+          <a href="#" id="modal-wa-btn" target="_blank" class="btn btn-success" style="flex:1 1 45%;justify-content:center;">
+            💬 WhatsApp অর্ডার
+          </a>
+          <button type="button" class="btn btn-secondary" onclick="closeProductModal()" style="flex:1 1 45%;justify-content:center;">
+            বন্ধ করুন
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Direct Order Modal -->
+  <div class="modal-overlay" id="order-modal" style="display:none;">
+    <div class="modal-content glass" style="max-width:500px;padding:2rem;">
+      <button class="modal-close" onclick="closeOrderModal()" aria-label="বন্ধ করুন">✕</button>
+      <div style="text-align:center;margin-bottom:1.25rem;">
+        <span style="font-size:2.2rem;">🛍️</span>
+        <h3 style="font-size:1.4rem;margin:0.25rem 0;">অর্ডার নিশ্চিত করুন</h3>
+        <p style="color:var(--text-muted);font-size:0.9rem;" id="order-shop-name"></p>
+      </div>
+
+      <form id="shop-order-form" onsubmit="submitShopOrder(event)">
+        <input type="hidden" id="order-product-id">
+        <div style="margin-bottom:0.75rem;">
+          <label style="display:block;font-size:0.85rem;margin-bottom:0.25rem;">আপনার নাম *</label>
+          <input type="text" id="order-name" required placeholder="পুরো নাম" style="width:100%;padding:0.6rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.75rem;">
+          <div>
+            <label style="display:block;font-size:0.85rem;margin-bottom:0.25rem;">মোবাইল নম্বর *</label>
+            <input type="tel" id="order-phone" required placeholder="01XXXXXXXXX" style="width:100%;padding:0.6rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+          </div>
+          <div>
+            <label style="display:block;font-size:0.85rem;margin-bottom:0.25rem;">পরিমাণ *</label>
+            <input type="number" id="order-qty" value="1" min="1" max="20" required onchange="updateShopOrderTotal()" style="width:100%;padding:0.6rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+          </div>
+        </div>
+        <div style="margin-bottom:0.75rem;">
+          <label style="display:block;font-size:0.85rem;margin-bottom:0.25rem;">ডেলিভারির ঠিকানা *</label>
+          <textarea id="order-address" required rows="2" placeholder="বাড়ি, রোড ও এলাকার নাম..." style="width:100%;padding:0.6rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);"></textarea>
+        </div>
+        <div style="margin-bottom:1rem;">
+          <label style="display:block;font-size:0.85rem;margin-bottom:0.25rem;">পেমেন্ট পদ্ধতি</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+            <label style="display:flex;align-items:center;gap:0.4rem;padding:0.5rem;border:1px solid var(--border);border-radius:8px;cursor:pointer;">
+              <input type="radio" name="shop-payment" value="cod" checked>
+              <span style="font-size:0.85rem;">🤝 ক্যাশ অন ডেলিভারি</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:0.4rem;padding:0.5rem;border:1px solid var(--border);border-radius:8px;cursor:pointer;">
+              <input type="radio" name="shop-payment" value="bkash">
+              <span style="font-size:0.85rem;">📱 বিকাশ / নগদ</span>
+            </label>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 0;border-top:1px solid var(--border);margin-bottom:1rem;">
+          <span>মোট প্রদেয় মূল্য:</span>
+          <span id="order-total" style="font-size:1.2rem;font-weight:bold;color:var(--accent);">৳ 0</span>
+        </div>
+        <div style="display:flex;gap:0.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeOrderModal()" style="flex:1;">বাতিল</button>
+          <button type="submit" id="shop-order-submit-btn" class="btn btn-primary" style="flex:2;">✅ অর্ডার নিশ্চিত করুন</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+
+  <script>
+    let currentSeller = null;
+    let currentSellerId = null;
+    let shopProducts = [];
+    let activeModalProduct = null;
+
+    function toBanglaNumber(num) {
+      const bDigits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+      return String(num).replace(/[0-9]/g, d => bDigits[d]);
+    }
+
+    function formatPrice(num) {
+      return '৳ ' + toBanglaNumber(Number(num || 0).toLocaleString('en-IN'));
+    }
+
+    function showToast(msg) {
+      const c = document.getElementById('toast-container');
+      if (!c) return;
+      const t = document.createElement('div');
+      t.className = 'toast';
+      t.textContent = msg;
+      c.appendChild(t);
+      requestAnimationFrame(() => t.classList.add('show'));
+      setTimeout(() => {
+        t.classList.remove('show');
+        setTimeout(() => t.remove(), 400);
+      }, 3500);
+    }
+
+    // Theme setup
+    const savedTheme = localStorage.getItem('ghoroa-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    const themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) {
+      themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+      themeBtn.addEventListener('click', () => {
+        const cur = document.documentElement.getAttribute('data-theme');
+        const next = cur === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('ghoroa-theme', next);
+        themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      currentSellerId = window.location.hash.substring(1);
+      const loading = document.getElementById('loading');
+      const content = document.getElementById('shop-content');
+
+      if (!currentSellerId) {
+        loading.innerHTML = '❌ কোনো বিক্রেতার আইডি পাওয়া যায়নি। <br><br><a href="index.html" class="btn btn-primary btn-sm">মার্কেটপ্লেসে ফিরুন</a>';
+        return;
+      }
+
+      try {
+        const doc = await db.collection('sellers').doc(currentSellerId).get();
+        if (!doc.exists) {
+          loading.innerHTML = '❌ দুঃখিত, এই বিক্রেতাকে পাওয়া যায়নি। <br><br><a href="index.html" class="btn btn-primary btn-sm">মার্কেটপ্লেসে ফিরুন</a>';
+          return;
+        }
+
+        currentSeller = doc.data();
+        document.title = (currentSeller.shopName || currentSeller.name || 'দোকান') + ' — ঘরোয়া';
+        document.getElementById('shop-name').textContent = currentSeller.shopName || currentSeller.name || 'দোকান';
+        document.getElementById('seller-name').textContent = currentSeller.name || 'বিক্রেতা';
+        document.getElementById('seller-area').textContent = '📍 ' + (currentSeller.area || 'ঢাকা');
+        document.getElementById('seller-story').textContent = currentSeller.story || currentSeller.description || 'হোমমেড পণ্য দিয়ে তৈরি ভালোবাসা ও ঐতিহ্যের মেলবন্ধন।';
+
+        // Avatar
+        const avatarEl = document.getElementById('seller-avatar');
+        if (currentSeller.photoURL) {
+          avatarEl.innerHTML = `<img src="${currentSeller.photoURL}" alt="${currentSeller.name}">`;
+        } else {
+          avatarEl.textContent = (currentSeller.name || 'ঘ')[0];
+        }
+
+        // WhatsApp & Call buttons
+        let phone = currentSeller.phone || '';
+        let intlPhone = phone.replace(/[^0-9]/g, '');
+        if (intlPhone && !intlPhone.startsWith('88')) intlPhone = '88' + intlPhone;
+
+        const waBtn = document.getElementById('shop-whatsapp-btn');
+        const callBtn = document.getElementById('shop-call-btn');
+
+        if (intlPhone) {
+          const shopMsg = encodeURIComponent(`হ্যালো! আমি ঘরোয়ায় আপনার "${currentSeller.shopName || 'দোকান'}" দেখেছি।`);
+          waBtn.href = `https://wa.me/${intlPhone}?text=${shopMsg}`;
+          callBtn.href = `tel:${phone}`;
+        } else {
+          waBtn.style.display = 'none';
+          callBtn.style.display = 'none';
+        }
+
+        // Load seller products
+        const pSnap = await db.collection('products').where('seller', '==', currentSellerId).get();
+        shopProducts = [];
+        pSnap.forEach(d => shopProducts.push({ id: d.id, ...d.data() }));
+
+        document.getElementById('products-count').textContent = toBanglaNumber(shopProducts.length);
+        const grid = document.getElementById('products-grid');
+
+        if (shopProducts.length === 0) {
+          grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem 1rem;color:var(--text-muted);">এই মুহূর্তে কোনো পণ্য যোগ করা হয়নি। শীঘ্রই নতুন পণ্য আসছে!</div>';
+        } else {
+          grid.innerHTML = shopProducts.map(p => {
+            const img = p.imageUrl || 'assets/achar.jpg';
+            return `
+              <div class="product-card glass" onclick="openProductModal('${p.id}')">
+                <div class="product-image">
+                  <img src="${img}" alt="${p.name}" loading="lazy">
+                  ${p.badge ? `<span class="product-badge">${p.badge}</span>` : ''}
+                  <div class="product-overlay"><span>অর্ডার করুন →</span></div>
+                </div>
+                <div class="product-info">
+                  <h3 class="product-name">${p.name}</h3>
+                  <p class="product-story-snippet">${(p.story || '').substring(0, 70)}...</p>
+                  <div class="product-footer">
+                    <span class="product-price">${formatPrice(p.price)}</span>
+                    <button class="btn btn-primary btn-sm">অর্ডার</button>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        loading.style.display = 'none';
+        content.style.display = 'block';
+
+      } catch (err) {
+        console.error(err);
+        loading.innerHTML = '❌ তথ্য লোড করতে সমস্যা হয়েছে। <br><br><a href="index.html" class="btn btn-primary btn-sm">পুনরায় চেষ্টা করুন</a>';
+      }
+    });
+
+    function shareShop() {
+      if (navigator.share) {
+        navigator.share({
+          title: document.title,
+          url: window.location.href
+        }).catch(() => {});
+      } else {
+        navigator.clipboard?.writeText(window.location.href);
+        showToast('দোকানের লিংক কপি হয়েছে! 📋');
+      }
+    }
+
+    function openProductModal(productId) {
+      activeModalProduct = shopProducts.find(p => p.id === productId);
+      if (!activeModalProduct) return;
+
+      document.getElementById('modal-img').src = activeModalProduct.imageUrl || 'assets/achar.jpg';
+      document.getElementById('modal-title').textContent = activeModalProduct.name;
+      document.getElementById('modal-price').textContent = formatPrice(activeModalProduct.price);
+      document.getElementById('modal-story').textContent = activeModalProduct.story || '';
+      document.getElementById('modal-badge').textContent = activeModalProduct.badge || '';
+
+      let phone = currentSeller?.phone || '';
+      if (phone && !phone.startsWith('88')) phone = '88' + phone;
+      const msg = encodeURIComponent(`হ্যালো! আমি "${activeModalProduct.name}" (${formatPrice(activeModalProduct.price)}) কিনতে চাই।`);
+      const waBtn = document.getElementById('modal-wa-btn');
+      if (phone) {
+        waBtn.href = `https://wa.me/${phone}?text=${msg}`;
+        waBtn.style.display = 'inline-flex';
+      } else {
+        waBtn.style.display = 'none';
+      }
+
+      document.getElementById('product-modal').style.display = 'flex';
+    }
+
+    function closeProductModal() {
+      document.getElementById('product-modal').style.display = 'none';
+    }
+
+    function openOrderFromShopModal() {
+      if (!activeModalProduct) return;
+      closeProductModal();
+
+      document.getElementById('order-product-id').value = activeModalProduct.id;
+      document.getElementById('order-shop-name').textContent = `${activeModalProduct.name} · ${formatPrice(activeModalProduct.price)}`;
+      document.getElementById('order-qty').value = 1;
+      updateShopOrderTotal();
+
+      document.getElementById('order-modal').style.display = 'flex';
+    }
+
+    function closeOrderModal() {
+      document.getElementById('order-modal').style.display = 'none';
+    }
+
+    function updateShopOrderTotal() {
+      if (!activeModalProduct) return;
+      const qty = Math.max(1, parseInt(document.getElementById('order-qty')?.value) || 1);
+      const total = (activeModalProduct.price || 0) * qty;
+      document.getElementById('order-total').textContent = formatPrice(total);
+    }
+
+    async function submitShopOrder(e) {
+      e.preventDefault();
+      if (!activeModalProduct || !currentSeller) return;
+
+      const buyerName = document.getElementById('order-name')?.value.trim();
+      const buyerPhone = document.getElementById('order-phone')?.value.trim();
+      const quantity = parseInt(document.getElementById('order-qty')?.value) || 1;
+      const buyerAddress = document.getElementById('order-address')?.value.trim();
+      const paymentMethod = document.querySelector('input[name="shop-payment"]:checked')?.value || 'cod';
+
+      if (!buyerName || !buyerPhone || !buyerAddress) {
+        showToast('সব তথ্য সঠিকভাবে দিন');
+        return;
+      }
+
+      const btn = document.getElementById('shop-order-submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'প্রক্রিয়াকরণ হচ্ছে...';
+
+      const totalAmount = (activeModalProduct.price || 0) * quantity;
+
+      try {
+        await db.collection('orders').add({
+          productId: activeModalProduct.id,
+          productName: activeModalProduct.name,
+          productImage: activeModalProduct.imageUrl || '',
+          unitPrice: activeModalProduct.price || 0,
+          quantity,
+          totalAmount,
+          buyerName,
+          buyerPhone,
+          buyerAddress,
+          buyerArea: currentSeller.area || '',
+          paymentMethod,
+          sellerId: currentSellerId,
+          sellerName: currentSeller.name || '',
+          status: 'pending',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        closeOrderModal();
+        showToast(`🎉 ধন্যবাদ ${buyerName}! আপনার অর্ডার সফলভাবে সম্পন্ন হয়েছে!`);
+        document.getElementById('shop-order-form')?.reset();
+      } catch (err) {
+        console.error('Order error:', err);
+        showToast('অর্ডার সম্পন্ন করতে সমস্যা হয়েছে');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '✅ অর্ডার নিশ্চিত করুন';
+      }
+    }
+  </script>
+</body>
+</html>

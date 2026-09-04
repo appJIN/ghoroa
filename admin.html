@@ -55,6 +55,10 @@
           <span class="nav-icon">🏪</span>
           <span class="nav-label">হাটবার</span>
         </a>
+        <a class="nav-item" data-tab="orders">
+          <span class="nav-icon">📦</span>
+          <span class="nav-label">অর্ডার</span>
+        </a>
       </nav>
 
       <div class="sidebar-footer">
@@ -214,6 +218,32 @@
               </thead>
               <tbody id="haats-table-body">
                 <tr><td colspan="7" class="text-center py-4">কোনো হাটবার পাওয়া যায়নি</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== ORDERS TAB ==================== -->
+      <div class="tab-content" data-tab="orders">
+        <div class="content-header">
+          <h2 class="content-title">সকল প্ল্যাটফর্ম অর্ডার</h2>
+        </div>
+        <div class="card">
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>পণ্য</th>
+                  <th>বিক্রেতা</th>
+                  <th>ক্রেতা ও যোগাযোগ</th>
+                  <th>পরিমাণ ও মূল্য</th>
+                  <th>তারিখ</th>
+                  <th>স্ট্যাটাস</th>
+                </tr>
+              </thead>
+              <tbody id="admin-orders-table-body">
+                <tr><td colspan="6" class="text-center py-4">লোড হচ্ছে...</td></tr>
               </tbody>
             </table>
           </div>
@@ -386,6 +416,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
   <script src="js/firebase-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="js/admin.js"></script>
 </body>
 </html>

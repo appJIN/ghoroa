@@ -213,6 +213,7 @@ function switchTab(tabName) {
     if (tabName === 'products') loadProducts();
     if (tabName === 'sellers') loadSellers();
     if (tabName === 'haats') loadHaats();
+    if (tabName === 'orders') loadAdminOrders();
 }
 
 /**
@@ -233,15 +234,23 @@ async function loadDashboardStats() {
     try {
         const productsSnap = await db.collection('products').get();
         const sellersSnap = await db.collection('sellers').get();
+        const haatsSnap = await db.collection('haats').get();
         
         const totalProducts = productsSnap.size;
         const totalSellers = sellersSnap.size;
+        const totalHaats = haatsSnap.size;
         
         let pendingCount = 0;
         sellersSnap.forEach(doc => {
             if (doc.data().approved === false || !doc.data().hasOwnProperty('approved')) {
                 pendingCount++;
             }
+        });
+
+        // Count pending haats
+        let pendingHaats = 0;
+        haatsSnap.forEach(doc => {
+            if (doc.data().approved !== true) pendingHaats++;
         });
 
         const statProducts = document.getElementById('stat-products');
@@ -251,8 +260,8 @@ async function loadDashboardStats() {
 
         if (statProducts) statProducts.textContent = totalProducts;
         if (statSellers) statSellers.textContent = totalSellers;
-        if (statPending) statPending.textContent = pendingCount;
-        if (statAreas) statAreas.textContent = DMP_AREAS.length;
+        if (statPending) statPending.textContent = pendingCount + pendingHaats;
+        if (statAreas) statAreas.textContent = totalHaats;
         
     } catch (error) {
         console.error("Error loading stats:", error);
@@ -331,6 +340,9 @@ function renderProductsTable(products) {
                 <div class="btn-group">
                     <button class="btn btn-sm btn-outline-primary" onclick="openEditProductModal('${product.id}')" title="এডিট">
                         <i class="bi bi-pencil"></i> এডিট
+                    </button>
+                    <button class="btn btn-sm btn-outline-info" onclick="generateProductQR('${product.id}', '${(product.name || 'Unnamed').replace(/'/g, "\\'")}')" title="QR Code">
+                        <i class="bi bi-qr-code"></i> QR
                     </button>
                     <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct('${product.id}')" title="ডিলিট">
                         <i class="bi bi-trash"></i> ডিলিট
@@ -503,6 +515,7 @@ async function saveProduct(e) {
             category,
             area,
             sellerName: seller,
+            sellerPhone: '',
             story,
             badge,
             featured,
@@ -1020,3 +1033,110 @@ async function toggleHaatLive(haatId, isLive) {
         showToast('স্ট্যাটাস পরিবর্তন করতে সমস্যা', 'error');
     }
 }
+
+function generateProductQR(productId, productName) {
+    const url = `https://ghoroa.shop/#product-${productId}`;
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:9999;';
+    overlay.innerHTML = `<div style="background:white;padding:2rem;border-radius:12px;text-align:center;max-width:350px;width:90%;">
+        <h3 style="color:#333;margin-bottom:1rem;">${productName}</h3>
+        <div id="qr-container" style="display:inline-block;margin:1rem 0;"></div>
+        <p style="color:#666;margin:0.5rem 0;font-size:0.8rem;word-break:break-all;">${url}</p>
+        <div style="display:flex;gap:0.5rem;justify-content:center;margin-top:1rem;">
+            <button id="qr-download-btn" style="padding:0.5rem 1.5rem;background:#3498db;color:white;border:none;border-radius:6px;cursor:pointer;">📥 ডাউনলোড</button>
+            <button onclick="this.closest('div').parentElement.parentElement.remove()" style="padding:0.5rem 1.5rem;background:#2ecc71;color:white;border:none;border-radius:6px;cursor:pointer;">বন্ধ করুন</button>
+        </div>
+    </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+    // Generate QR code using qrcodejs
+    setTimeout(() => {
+        const container = document.getElementById('qr-container');
+        if (container && typeof QRCode !== 'undefined') {
+            new QRCode(container, {
+                text: url,
+                width: 200,
+                height: 200,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            // Download button
+            document.getElementById('qr-download-btn').addEventListener('click', () => {
+                const canvas = container.querySelector('canvas');
+                if (canvas) {
+                    const link = document.createElement('a');
+                    link.download = `QR-${productName}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                }
+            });
+        } else {
+            container.innerHTML = '<p style="color:red;">QR লাইব্রেরি লোড হয়নি</p>';
+        }
+    }, 100);
+}
+
+// ==========================================
+// Admin Orders Management
+// ==========================================
+
+async function loadAdminOrders() {
+    const tbody = document.getElementById('admin-orders-table-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">অর্ডার লোড হচ্ছে...</td></tr>';
+
+    try {
+        const snapshot = await db.collection('orders').orderBy('createdAt', 'desc').limit(50).get();
+
+        if (snapshot.empty) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">এখনো কোনো অর্ডার আসেনি</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        snapshot.forEach(doc => {
+            const order = doc.data();
+            const tr = document.createElement('tr');
+
+            let statusHtml = '';
+            switch(order.status) {
+                case 'pending': statusHtml = '<span class="badge bg-warning text-dark">⏳ পেন্ডিং</span>'; break;
+                case 'confirmed': statusHtml = '<span class="badge bg-info">✅ কনফার্মড</span>'; break;
+                case 'delivered': statusHtml = '<span class="badge bg-success">📦 ডেলিভার্ড</span>'; break;
+                case 'cancelled': statusHtml = '<span class="badge bg-danger">❌ বাতিল</span>'; break;
+                default: statusHtml = '<span class="badge bg-warning text-dark">⏳ পেন্ডিং</span>';
+            }
+
+            let dateStr = 'N/A';
+            if (order.createdAt) {
+                const d = order.createdAt.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
+                dateStr = formatDate(d);
+            }
+
+            tr.innerHTML = `
+                <td>
+                    <strong>${order.productName || 'পণ্য'}</strong>
+                </td>
+                <td>${order.sellerName || order.sellerId || 'সেলার'}</td>
+                <td>
+                    <strong>${order.buyerName || 'ক্রেতা'}</strong>
+                    <br><small style="color:var(--text-muted);">📞 ${order.buyerPhone || ''} · 📍 ${order.buyerArea || ''}</small>
+                </td>
+                <td>
+                    ${order.quantity || 1}টি — ৳${order.totalAmount || 0}
+                    <br><small style="color:var(--text-muted);">${order.paymentMethod === 'bkash' ? 'বিকাশ/নগদ' : 'ক্যাশ অন ডেলিভারি'}</small>
+                </td>
+                <td>${dateStr}</td>
+                <td>${statusHtml}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (error) {
+        console.error('Error loading admin orders:', error);
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">অর্ডার লোড করতে সমস্যা হয়েছে</td></tr>';
+    }
+}
+

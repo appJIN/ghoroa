@@ -15,9 +15,15 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
   <link rel="canonical" href="https://ghoroa.shop/">
   <meta name="theme-color" content="#006a4e">
-  <meta name="robots" content="index, follow">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <meta name="author" content="ঘরোয়া">
   <meta name="language" content="Bengali">
+  <meta name="geo.region" content="BD">
+  <meta name="geo.placename" content="Dhaka">
+  <meta http-equiv="content-language" content="bn">
+  <link rel="alternate" hreflang="bn" href="https://ghoroa.shop/">
+  <meta property="og:locale" content="bn_BD">
+  <meta property="og:site_name" content="ঘরোয়া">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
@@ -27,44 +33,65 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://firebasestorage.googleapis.com">
+  <link rel="dns-prefetch" href="https://www.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://ghoroa.shop/#organization",
+        "name": "ঘরোয়া - Ghoroa",
+        "url": "https://ghoroa.shop",
+        "description": "বাংলাদেশের প্রথম হোমমেড প্রোডাক্ট মার্কেটপ্লেস",
+        "foundingDate": "2026",
+        "areaServed": {
+          "@type": "City",
+          "name": "Dhaka",
+          "containedInPlace": {
+            "@type": "Country",
+            "name": "Bangladesh"
+          }
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer service",
+          "telephone": "+8801913362221",
+          "email": "ghoroa.hmmp@gmail.com",
+          "availableLanguage": "Bengali"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://ghoroa.shop/#website",
+        "url": "https://ghoroa.shop",
+        "name": "ঘরোয়া",
+        "publisher": { "@id": "https://ghoroa.shop/#organization" },
+        "inLanguage": "bn",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://ghoroa.shop/?s={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "হোম", "item": "https://ghoroa.shop/" },
+          { "@type": "ListItem", "position": 2, "name": "পণ্য সমূহ", "item": "https://ghoroa.shop/#products" },
+          { "@type": "ListItem", "position": 3, "name": "হাটবার", "item": "https://ghoroa.shop/#haat" },
+          { "@type": "ListItem", "position": 4, "name": "দোকান খুলুন", "item": "https://ghoroa.shop/#open-shop" }
+        ]
+      }
+    ]
+  }
+  </script>
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- Structured Data: Organization -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "ঘরোয়া",
-    "alternateName": "Ghoroa",
-    "url": "https://ghoroa.shop",
-    "logo": "https://ghoroa.shop/assets/hero.jpg",
-    "description": "বাংলাদেশের প্রথম হোমমেড প্রোডাক্ট মার্কেটপ্লেস — আচার, পিঠা, নকশিকাঁথা, জামদানি, হস্তশিল্প সবকিছু এক জায়গায়।",
-    "areaServed": {
-      "@type": "City",
-      "name": "Dhaka",
-      "addressCountry": "BD"
-    },
-    "sameAs": []
-  }
-  </script>
-
-  <!-- Structured Data: WebSite with Search -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "ঘরোয়া",
-    "alternateName": "Ghoroa",
-    "url": "https://ghoroa.shop",
-    "inLanguage": "bn",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://ghoroa.shop/?q={search_term_string}",
-      "query-input": "required name=search_term_string"
-    }
-  }
-  </script>
 
   <!-- Structured Data: FAQPage -->
   <script type="application/ld+json">
@@ -214,8 +241,13 @@
         <li><a href="#haat">হাটবার</a></li>
         <li><a href="#products">প্রোডাক্ট</a></li>
         <li><a href="#areas">এলাকা</a></li>
+        <li><a href="#faq">❓ প্রশ্নোত্তর</a></li>
         <li><a href="#open-shop" class="nav-cta">দোকান খুলুন</a></li>
+<<<<<<< HEAD
         <li><a href="seller.html" class="nav-seller-btn" style="background:rgba(46,204,113,0.15);color:var(--primary);padding:0.4rem 0.85rem;border-radius:20px;border:1px solid rgba(46,204,113,0.3);font-weight:600;display:inline-flex;align-items:center;gap:0.3rem;">🏪 সেলার লগইন</a></li>
+=======
+        <li><a href="seller.html" class="nav-seller-btn">🏪 সেলার লগইন</a></li>
+>>>>>>> origin/main
       </ul>
 
       <div class="nav-actions">
@@ -241,8 +273,13 @@
         <li><a href="#haat">হাটবার</a></li>
         <li><a href="#products">প্রোডাক্ট</a></li>
         <li><a href="#areas">এলাকা</a></li>
+        <li><a href="#faq">❓ প্রশ্নোত্তর</a></li>
         <li><a href="#open-shop" class="nav-cta">দোকান খুলুন</a></li>
+<<<<<<< HEAD
         <li><a href="seller.html" style="color:var(--primary);font-weight:600;display:inline-block;padding:0.4rem 0;">🏪 সেলার ড্যাশবোর্ড / লগইন</a></li>
+=======
+        <li><a href="seller.html" class="nav-seller-btn" style="border:1px solid var(--primary);display:inline-block;padding:0.5rem 1rem;border-radius:8px;margin-top:0.25rem;">🏪 সেলার লগইন</a></li>
+>>>>>>> origin/main
       </ul>
     </div>
   </nav>
@@ -440,7 +477,6 @@
             <h3>📖 গল্পের দোকান</h3>
             <p id="modal-story-text"></p>
           </div>
-
           <div class="modal-actions" style="display:flex;gap:0.75rem;flex-wrap:wrap;">
             <a href="#" class="btn btn-success btn-lg" id="modal-whatsapp" target="_blank" rel="noopener" style="flex:1;min-width:180px;justify-content:center;">
               💬 WhatsApp-এ অর্ডার
@@ -510,6 +546,25 @@
             </div>
           </div>
 
+          <div class="payment-methods" style="margin-top:1rem;padding:1rem;background:var(--surface-2, rgba(255,255,255,0.05));border-radius:12px;border:1px solid var(--border);">
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem;text-align:center;">💳 পেমেন্ট মেথড</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;">
+              <span class="payment-badge" style="display:inline-flex;align-items:center;gap:0.35rem;padding:0.4rem 0.75rem;border-radius:8px;font-size:0.8rem;font-weight:600;background:linear-gradient(135deg,#E2136E,#A4005A);color:white;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="10"/><text x="6" y="16" font-size="11" fill="#E2136E" font-weight="bold">b</text></svg>
+                বিকাশ
+              </span>
+              <span class="payment-badge" style="display:inline-flex;align-items:center;gap:0.35rem;padding:0.4rem 0.75rem;border-radius:8px;font-size:0.8rem;font-weight:600;background:linear-gradient(135deg,#F6921E,#D97B00);color:white;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="10"/><text x="5" y="16" font-size="10" fill="#F6921E" font-weight="bold">N</text></svg>
+                নগদ
+              </span>
+              <span class="payment-badge" style="display:inline-flex;align-items:center;gap:0.35rem;padding:0.4rem 0.75rem;border-radius:8px;font-size:0.8rem;font-weight:600;background:linear-gradient(135deg,#8B2F87,#6A1D6A);color:white;">
+                🚀 রকেট
+              </span>
+              <span class="payment-badge" style="display:inline-flex;align-items:center;gap:0.35rem;padding:0.4rem 0.75rem;border-radius:8px;font-size:0.8rem;font-weight:600;background:linear-gradient(135deg,#2ecc71,#27ae60);color:white;">
+                🤝 ক্যাশ অন ডেলিভারি
+              </span>
+            </div>
+          </div>
           <div class="modal-share">
             <span>শেয়ার করুন:</span>
             <button class="share-btn" data-platform="facebook" aria-label="ফেসবুকে শেয়ার">📘</button>
@@ -518,6 +573,78 @@
           </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- ===================== DIRECT ORDER MODAL ===================== -->
+  <div class="modal-overlay" id="order-modal" style="display:none;">
+    <div class="modal-content glass" style="max-width:520px;padding:2rem;">
+      <button class="modal-close" onclick="closeOrderModal()" aria-label="বন্ধ করুন">✕</button>
+      <div class="order-modal-header" style="text-align:center;margin-bottom:1.5rem;">
+        <span style="font-size:2.5rem;display:inline-block;margin-bottom:0.25rem;">🛍️</span>
+        <h2 style="font-size:1.6rem;margin-bottom:0.25rem;">সহজ অর্ডার</h2>
+        <p style="color:var(--text-muted);font-size:0.95rem;">পণ্যটি পেতে নিচের প্রয়োজনীয় তথ্যগুলো পূরণ করুন</p>
+      </div>
+
+      <div id="order-product-summary" style="display:flex;gap:1rem;align-items:center;background:rgba(255,255,255,0.05);padding:0.75rem 1rem;border-radius:10px;margin-bottom:1.25rem;border:1px solid var(--border);">
+        <img id="order-summary-img" src="" alt="" style="width:55px;height:55px;border-radius:8px;object-fit:cover;">
+        <div style="flex:1;">
+          <h4 id="order-summary-title" style="margin:0 0 0.25rem 0;font-size:1.05rem;">পণ্য</h4>
+          <span id="order-summary-price" style="color:var(--primary-light);font-weight:bold;font-size:1.1rem;">৳ 0</span>
+        </div>
+      </div>
+
+      <form id="direct-order-form" onsubmit="handleDirectOrderSubmit(event)">
+        <input type="hidden" id="order-product-id">
+        <input type="hidden" id="order-seller-id">
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label style="display:block;margin-bottom:0.35rem;font-weight:500;">আপনার নাম *</label>
+          <input type="text" id="order-buyer-name" required placeholder="যেমন: ফারহানা করিম" style="width:100%;padding:0.65rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+        </div>
+        <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;">
+          <div class="form-group">
+            <label style="display:block;margin-bottom:0.35rem;font-weight:500;">মোবাইল নম্বর *</label>
+            <input type="tel" id="order-buyer-phone" required placeholder="01XXXXXXXXX" style="width:100%;padding:0.65rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+          </div>
+          <div class="form-group">
+            <label style="display:block;margin-bottom:0.35rem;font-weight:500;">পরিমাণ (সংখ্যা) *</label>
+            <input type="number" id="order-quantity" value="1" min="1" max="50" required onchange="updateOrderTotal()" style="width:100%;padding:0.65rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label style="display:block;margin-bottom:0.35rem;font-weight:500;">এলাকা / থানা *</label>
+          <select id="order-buyer-area" required style="width:100%;padding:0.65rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);">
+            <option value="">এলাকা নির্বাচন করুন</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label style="display:block;margin-bottom:0.35rem;font-weight:500;">ডেলিভারির সম্পূর্ণ ঠিকানা *</label>
+          <textarea id="order-buyer-address" required rows="2" placeholder="বাড়ি/রোড/ফ্ল্যাট নম্বর বা এলাকার ল্যান্ডমার্ক..." style="width:100%;padding:0.65rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label style="display:block;margin-bottom:0.35rem;font-weight:500;">পেমেন্ট পদ্ধতি</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+            <label style="display:flex;align-items:center;gap:0.5rem;padding:0.6rem;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:rgba(255,255,255,0.03);">
+              <input type="radio" name="order-payment" value="cod" checked>
+              <span>🤝 ক্যাশ অন ডেলিভারি</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:0.5rem;padding:0.6rem;border:1px solid var(--border);border-radius:8px;cursor:pointer;background:rgba(255,255,255,0.03);">
+              <input type="radio" name="order-payment" value="bkash">
+              <span>📱 বিকাশ / নগদ</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 0;border-top:1px solid var(--border);margin-bottom:1.25rem;">
+          <span style="font-size:1.1rem;font-weight:600;">সর্বমোট মূল্য:</span>
+          <span id="order-total-amount" style="font-size:1.3rem;font-weight:bold;color:var(--accent);">৳ 0</span>
+        </div>
+
+        <div style="display:flex;gap:0.75rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeOrderModal()" style="flex:1;">বাতিল</button>
+          <button type="submit" id="order-submit-btn" class="btn btn-primary" style="flex:2;">✅ অর্ডার নিশ্চিত করুন</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -721,13 +848,75 @@
   <!-- ===================== FAQ ===================== -->
   <section id="faq" class="section section-alt">
     <div class="container">
-      <div class="section-header animate-on-scroll">
+      <div class="section-header animate-on-scroll visible">
         <span class="section-tag">❓ প্রশ্নোত্তর</span>
         <h2 class="section-title">সচরাচর জিজ্ঞাসা</h2>
         <p class="section-subtitle">আপনার মনে যেসব প্রশ্ন আসতে পারে</p>
       </div>
       <div class="faq-list" id="faq-list">
-        <!-- Rendered by JavaScript -->
+        <div class="faq-item glass animate-on-scroll visible">
+          <button class="faq-question" onclick="toggleFAQ(this)" aria-expanded="false">
+            <span>ঘরোয়ায় দোকান খুলতে কত খরচ?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>সম্পূর্ণ ফ্রি! কোনো রেজিস্ট্রেশন ফি, মাসিক চার্জ বা কমিশন নেই। আপনি যা বিক্রি করবেন, পুরো টাকাটাই আপনার।</p>
+          </div>
+        </div>
+        <div class="faq-item glass animate-on-scroll visible">
+          <button class="faq-question" onclick="toggleFAQ(this)" aria-expanded="false">
+            <span>কীভাবে পেমেন্ট নেব?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>বিকাশ, নগদ, রকেট — যেকোনো মোবাইল ব্যাংকিং-এ সরাসরি পেমেন্ট নিতে পারবেন। ক্যাশ অন ডেলিভারিও সাপোর্ট করি।</p>
+          </div>
+        </div>
+        <div class="faq-item glass animate-on-scroll visible">
+          <button class="faq-question" onclick="toggleFAQ(this)" aria-expanded="false">
+            <span>ডেলিভারি কীভাবে হবে?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>আপনার এলাকায় নিজে ডেলিভারি দিতে পারেন (ফ্রি), অথবা আমাদের পার্টনার — পাঠাও, রেডএক্স, স্টেডফাস্ট-এর মাধ্যমে সারা ঢাকায় ডেলিভারি দিতে পারবেন।</p>
+          </div>
+        </div>
+        <div class="faq-item glass animate-on-scroll visible">
+          <button class="faq-question" onclick="toggleFAQ(this)" aria-expanded="false">
+            <span>কী কী প্রোডাক্ট বিক্রি করতে পারব?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>ঘরে তৈরি খাবার, হস্তশিল্প, পোশাক, আর্ট, প্রাকৃতিক প্রোডাক্ট, কাস্টম গিফট — যেকোনো হোমমেড বা হ্যান্ডমেড প্রোডাক্ট বিক্রি করতে পারবেন।</p>
+          </div>
+        </div>
+        <div class="faq-item glass animate-on-scroll visible">
+          <button class="faq-question" onclick="toggleFAQ(this)" aria-expanded="false">
+            <span>"হাটবার" কী?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>হাটবার হলো আমাদের ইউনিক ফিচার — নির্দিষ্ট দিনে ও সময়ে আপনি একটি "ফ্ল্যাশ হাট" বসাতে পারবেন। যেমন "প্রতি শুক্রবার পিঠার হাট"। এতে কাস্টমারদের মধ্যে excitement তৈরি হয়, বিক্রি বাড়ে।</p>
+          </div>
+        </div>
+        <div class="faq-item glass animate-on-scroll visible">
+          <button class="faq-question" onclick="toggleFAQ(this)" aria-expanded="false">
+            <span>আমি কি একাধিক ক্যাটাগরিতে প্রোডাক্ট রাখতে পারব?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>অবশ্যই! আপনি একই দোকানে যত খুশি ক্যাটাগরিতে প্রোডাক্ট রাখতে পারবেন।</p>
+          </div>
+        </div>
+        <div class="faq-item glass animate-on-scroll visible">
+          <button class="faq-question" onclick="toggleFAQ(this)" aria-expanded="false">
+            <span>ঘরোয়া কি শুধু ঢাকার জন্য?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-answer">
+            <p>আপাতত ঢাকার সব এলাকায় সার্ভিস দিচ্ছি। শীঘ্রই চট্টগ্রাম, সিলেট, রাজশাহীসহ সারা বাংলাদেশে সম্প্রসারিত হবে।</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -735,12 +924,12 @@
   <!-- ===================== CTA BANNER ===================== -->
   <section class="cta-banner">
     <div class="container">
-      <div class="cta-content animate-on-scroll">
+      <div class="cta-content animate-on-scroll visible">
         <h2>আজই শুরু করুন আপনার হোম বিজনেস! 🚀</h2>
         <p>হাজার হাজার সেলার ইতিমধ্যে ঘরোয়ায় সফলভাবে বিক্রি করছেন। আপনিও যোগ দিন!</p>
         <div class="cta-buttons">
           <a href="#open-shop" class="btn btn-accent btn-lg">দোকান খুলুন — ফ্রি</a>
-          <a href="https://wa.me/8801XXXXXXXXX?text=ঘরোয়া সম্পর্কে জানতে চাই" class="btn btn-secondary btn-lg" target="_blank" rel="noopener">💬 আমাদের সাথে কথা বলুন</a>
+          <a href="https://wa.me/8801913362221?text=ঘরোয়া সম্পর্কে জানতে চাই" class="btn btn-secondary btn-lg" target="_blank" rel="noopener">💬 আমাদের সাথে কথা বলুন</a>
         </div>
       </div>
     </div>
@@ -792,14 +981,14 @@
         <div class="footer-col">
           <h4>পেমেন্ট মেথড</h4>
           <div class="footer-payment">
-            <div class="payment-badge glass">বিকাশ</div>
-            <div class="payment-badge glass">নগদ</div>
-            <div class="payment-badge glass">রকেট</div>
-            <div class="payment-badge glass">ক্যাশ</div>
+            <div class="payment-badge" style="background:linear-gradient(135deg,#E2136E,#A4005A);color:white;padding:0.4rem 0.75rem;border-radius:8px;font-weight:600;font-size:0.8rem;">বিকাশ</div>
+            <div class="payment-badge" style="background:linear-gradient(135deg,#F6921E,#D97B00);color:white;padding:0.4rem 0.75rem;border-radius:8px;font-weight:600;font-size:0.8rem;">নগদ</div>
+            <div class="payment-badge" style="background:linear-gradient(135deg,#8B2F87,#6A1D6A);color:white;padding:0.4rem 0.75rem;border-radius:8px;font-weight:600;font-size:0.8rem;">🚀 রকেট</div>
+            <div class="payment-badge" style="background:linear-gradient(135deg,#2ecc71,#27ae60);color:white;padding:0.4rem 0.75rem;border-radius:8px;font-weight:600;font-size:0.8rem;">🤝 ক্যাশ</div>
           </div>
           <h4 style="margin-top: 1.5rem;">যোগাযোগ</h4>
-          <p>📧 hello@ghoroa.com</p>
-          <p>📞 01913362221</p>
+          <p>📧 <a href="mailto:ghoroa.hmmp@gmail.com" style="color:inherit;text-decoration:none;">ghoroa.hmmp@gmail.com</a></p>
+          <p>📞 <a href="tel:01913362221" style="color:inherit;text-decoration:none;">০১৯১৩-৩৬২২২১</a></p>
         </div>
       </div>
 

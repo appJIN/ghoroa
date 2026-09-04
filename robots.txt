@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /admin.html
+Disallow: /js/admin.js
+Disallow: /js/seller.js
 
 Sitemap: https://ghoroa.shop/sitemap.xml
