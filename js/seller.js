@@ -246,7 +246,8 @@ function switchTab(tabName) {
     'my-orders': 'অর্ডার খাতা',
     'my-products': 'আমার প্রোডাক্ট',
     'my-shop': 'দোকান সেটিংস',
-    'my-haats': 'আমার হাটবার'
+    'my-haats': 'আমার হাটবার',
+    'my-finance': 'হিসাবের খাতা'
   };
   const titleEl = document.getElementById('page-title');
   if (titleEl) titleEl.textContent = titles[tabName] || 'ড্যাশবোর্ড';
@@ -257,6 +258,7 @@ function switchTab(tabName) {
   if (tabName === 'my-products') loadMyProducts();
   if (tabName === 'my-haats') loadMyHaats();
   if (tabName === 'notifications') loadNotifications();
+  if (tabName === 'my-finance') loadFinanceStats();
 }
 
 // ==========================================
@@ -302,6 +304,37 @@ async function loadDashboardStats() {
     renderRecentActivity(products, myOrders);
   } catch (error) {
     console.error("Error loading stats:", error);
+  }
+}
+
+async function loadFinanceStats() {
+  try {
+    const ordersSnap = await db.collection('orders').where('sellerId', '==', currentUser.uid).get();
+    let totalSales = 0;
+    let pendingSales = 0;
+    let totalOrders = 0;
+    
+    ordersSnap.forEach(doc => {
+      const order = doc.data();
+      totalOrders++;
+      const price = parseInt(order.totalPrice || order.totalAmount || 0);
+      
+      if (order.status === 'delivered') {
+        totalSales += price;
+      } else if (order.status === 'pending' || order.status === 'shipped') {
+        pendingSales += price;
+      }
+    });
+
+    const statTotalSales = document.getElementById('stat-total-sales');
+    const statPendingSales = document.getElementById('stat-pending-sales');
+    const statFinanceOrders = document.getElementById('stat-finance-orders');
+    
+    if (statTotalSales) statTotalSales.textContent = `৳ ${totalSales}`;
+    if (statPendingSales) statPendingSales.textContent = `৳ ${pendingSales}`;
+    if (statFinanceOrders) statFinanceOrders.textContent = totalOrders;
+  } catch (error) {
+    console.error("Error loading finance stats:", error);
   }
 }
 
@@ -405,6 +438,14 @@ function renderProductsTable(products) {
     } else if (product.stockStatus === 'out_of_stock') {
       stockBadge = '<span class="status-badge rejected">❌ স্টক শেষ</span>';
     }
+    
+    if (product.stockQuantity !== undefined && product.stockStatus === 'in_stock') {
+      if (product.stockQuantity <= 3 && product.stockQuantity > 0) {
+        stockBadge += `<br><small style="color:var(--warning);font-weight:bold;">⚠️ Low Stock: ${product.stockQuantity}</small>`;
+      } else {
+        stockBadge += `<br><small style="color:var(--text-muted);">${product.stockQuantity} পিস আছে</small>`;
+      }
+    }
 
     const unitDisplay = product.unit ? `<br><small style="color:var(--text-muted);">${product.unit}</small>` : '';
 
@@ -487,6 +528,9 @@ function openEditProductModal(productId) {
   if (unitInput) unitInput.value = product.unit || '';
   const stockInput = document.getElementById('product-stock-status');
   if (stockInput) stockInput.value = product.stockStatus || 'in_stock';
+  
+  const qtyInput = document.getElementById('product-stock-quantity');
+  if (qtyInput) qtyInput.value = product.stockQuantity || 0;
 
   const preview = document.getElementById('image-preview');
   if (preview && product.imageUrl) {
@@ -528,18 +572,28 @@ async function saveProduct(e) {
   const category = document.getElementById('product-category').value;
   const story = document.getElementById('product-story').value.trim();
   const badge = document.getElementById('product-badge').value;
+  const stockQuantity = parseInt(document.getElementById('product-stock-quantity')?.value) || 0;
 
   if (!name || !price || !category || !story) {
     showToast('সব প্রয়োজনীয় ফিল্ড পূরণ করুন', 'error');
     return;
   }
 
+  const submitBtn = e.target.querySelector('button[type="submit"]') || document.getElementById('save-product-btn');
+  const originalBtnText = submitBtn ? submitBtn.innerHTML : '💾 সেভ করুন';
+
   try {
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '⏳ আপলোড ও সেভ হচ্ছে...';
+    }
+
     let imageUrl = '';
 
     // Upload image if selected
     if (currentImageFile && storage) {
-      const storageRef = storage.ref(`products/${Date.now()}_${currentImageFile.name}`);
+      const safeName = (currentImageFile.name || 'product.jpg').replace(/[^a-zA-Z0-9.]/g, '_');
+      const storageRef = storage.ref(`products/${Date.now()}_${safeName}`);
       const uploadTask = await storageRef.put(currentImageFile);
       imageUrl = await uploadTask.ref.getDownloadURL();
     }
@@ -560,6 +614,7 @@ async function saveProduct(e) {
       shopNagad: sellerProfile.nagad || '',
       story,
       badge,
+      stockQuantity,
       featured: false,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
@@ -586,6 +641,11 @@ async function saveProduct(e) {
   } catch (error) {
     console.error("Save product error:", error);
     showToast('সেভ করতে সমস্যা: ' + error.message, 'error');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnText;
+    }
   }
 }
 
@@ -873,6 +933,30 @@ function openAddOrderModal() {
   if (form) form.reset();
   document.getElementById('order-id').value = '';
   document.getElementById('order-modal-title').textContent = 'নতুন অর্ডার রেকর্ড করুন';
+  
+  // Populate product dropdown
+  const productSelect = document.getElementById('order-product-select');
+  if (productSelect) {
+    productSelect.innerHTML = '<option value="">প্রোডাক্ট সিলেক্ট করুন</option>';
+    myProducts.forEach(p => {
+      const option = document.createElement('option');
+      option.value = p.id;
+      option.textContent = `${p.name} (৳${p.price}) - স্টক: ${p.stockQuantity || 0}`;
+      option.dataset.name = p.name;
+      option.dataset.price = p.price;
+      productSelect.appendChild(option);
+    });
+    
+    // Auto fill price when product is selected
+    productSelect.addEventListener('change', (e) => {
+      const selected = e.target.options[e.target.selectedIndex];
+      const qty = parseInt(document.getElementById('order-quantity')?.value) || 1;
+      if (selected && selected.dataset.price) {
+        document.getElementById('order-total-price').value = parseInt(selected.dataset.price) * qty;
+      }
+    });
+  }
+
   const modal = document.getElementById('order-modal');
   if (modal) {
     modal.style.display = 'flex';
@@ -892,13 +976,16 @@ async function saveOrder(e) {
   e.preventDefault();
   const customerName = document.getElementById('order-customer-name')?.value.trim();
   const customerPhone = document.getElementById('order-customer-phone')?.value.trim();
-  const productName = document.getElementById('order-product-name')?.value.trim();
+  const productSelect = document.getElementById('order-product-select');
+  const productId = productSelect?.value;
+  const productName = productSelect?.options[productSelect.selectedIndex]?.dataset?.name || '';
+  const quantity = parseInt(document.getElementById('order-quantity')?.value) || 1;
   const totalPrice = parseInt(document.getElementById('order-total-price')?.value) || 0;
   const customerAddress = document.getElementById('order-customer-address')?.value.trim();
   const paymentMethod = document.getElementById('order-payment-method')?.value;
   const status = document.getElementById('order-status')?.value || 'pending';
 
-  if (!customerName || !customerPhone || !productName) {
+  if (!customerName || !customerPhone || !productId) {
     showToast('সব প্রয়োজনীয় ফিল্ড পূরণ করুন', 'error');
     return;
   }
@@ -909,7 +996,9 @@ async function saveOrder(e) {
       sellerName: sellerProfile?.shopName || currentUser.displayName || 'সেলার',
       customerName,
       customerPhone,
+      productId,
       productName,
+      quantity,
       totalPrice,
       customerAddress,
       paymentMethod,
@@ -917,6 +1006,16 @@ async function saveOrder(e) {
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
+
+    // Decrease stock if in_stock
+    const product = myProducts.find(p => p.id === productId);
+    if (product && product.stockStatus === 'in_stock') {
+      let newStock = (product.stockQuantity || 0) - quantity;
+      if (newStock < 0) newStock = 0;
+      await db.collection('products').doc(productId).update({
+        stockQuantity: newStock
+      });
+    }
 
     await db.collection('orders').add(orderData);
     showToast('অর্ডার সফলভাবে রেকর্ড হয়েছে! 🎉', 'success');
@@ -1282,82 +1381,7 @@ function showToast(message, type = 'success') {
   }, 3000);
 }
 
-// ==========================================
-// Orders Tracking
-// ==========================================
 
-async function loadMyOrders() {
-  const tbody = document.getElementById('orders-table-body');
-  if (!tbody) return;
-  tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">অর্ডার লোড হচ্ছে...</td></tr>';
-
-  try {
-    const snapshot = await db.collection('orders')
-      .where('sellerId', '==', currentUser.uid)
-      .orderBy('createdAt', 'desc')
-      .limit(20)
-      .get();
-
-    if (snapshot.empty) {
-      tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4" style="color:var(--text-muted);">এখনো কোনো সরাসরি অর্ডার আসেনি। ক্রেতারা ওয়েবসাইট থেকে অর্ডার করলে এখানে দেখাবে।</td></tr>';
-      return;
-    }
-
-    tbody.innerHTML = '';
-    snapshot.forEach(doc => {
-      const order = doc.data();
-      const tr = document.createElement('tr');
-      let statusHtml = '';
-      switch(order.status) {
-        case 'pending': statusHtml = '<span class="status-badge pending">⏳ পেন্ডিং</span>'; break;
-        case 'confirmed': statusHtml = '<span class="status-badge approved">✅ কনফার্মড</span>'; break;
-        case 'delivered': statusHtml = '<span class="status-badge approved">📦 ডেলিভার্ড</span>'; break;
-        case 'cancelled': statusHtml = '<span class="status-badge rejected">❌ বাতিল</span>'; break;
-        default: statusHtml = '<span class="status-badge pending">⏳ পেন্ডিং</span>';
-      }
-      let dateStr = 'N/A';
-      if (order.createdAt) {
-        const d = order.createdAt.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
-        dateStr = d.toLocaleDateString('bn-BD');
-      }
-      const buyerInfo = `<strong>${order.buyerName || 'ক্রেতা'}</strong><br><small style="color:var(--text-muted);">📞 ${order.buyerPhone || ''} · 📍 ${order.buyerArea || ''}</small>`;
-      const productInfo = `<strong>${order.productName || ''}</strong><br><small style="color:var(--text-muted);">${order.quantity || 1}টি · ৳${order.totalAmount || 0} (${order.paymentMethod === 'bkash' ? 'বিকাশ' : 'ক্যাশ'})</small>`;
-
-      tr.innerHTML = `
-        <td>${productInfo}</td>
-        <td>${buyerInfo}</td>
-        <td>${dateStr}</td>
-        <td>${statusHtml}</td>
-        <td>
-          <button class="btn btn-sm btn-outline" onclick="updateOrderStatus('${doc.id}')">আপডেট</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  } catch(error) {
-    console.error('Error loading orders:', error);
-    tbody.innerHTML = '<tr><td colspan="5" class="text-center py-4">অর্ডার লোড করতে সমস্যা হয়েছে</td></tr>';
-  }
-}
-
-async function updateOrderStatus(orderId) {
-  const status = prompt('নতুন স্ট্যাটাস নির্বাচন করুন:\n১ = পেন্ডিং (Pending)\n২ = কনফার্মড (Confirmed)\n৩ = ডেলিভার্ড (Delivered)\n৪ = বাতিল (Cancelled)');
-  const statusMap = { '1': 'pending', '2': 'confirmed', '3': 'delivered', '4': 'cancelled' };
-  const newStatus = statusMap[status];
-  if (!newStatus) return;
-
-  try {
-    await db.collection('orders').doc(orderId).update({
-      status: newStatus,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    showToast('অর্ডারের স্ট্যাটাস আপডেট হয়েছে! ✅', 'success');
-    loadMyOrders();
-  } catch(e) {
-    console.error('Order update error:', e);
-    showToast('স্ট্যাটাস আপডেট করতে সমস্যা হয়েছে', 'error');
-  }
-}
 
 // ==========================================
 // Notifications
