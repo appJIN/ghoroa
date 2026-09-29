@@ -5,8 +5,36 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>দোকান — ঘরোয়া মার্কেটপ্লেস</title>
   <meta name="description" content="ঘরোয়া ভেরিফায়েড হোমমেড সেলারের পাবলিক শপ পেজ — ঘরে তৈরি খাঁটি পণ্য সরাসরি অর্ডার করুন।">
+  <meta name="keywords" content="ঘরোয়া দোকান, হোমমেড খাবার, পিঠা, আচার, হস্তশিল্প, ঢাকা ডেলিভারি, অনলাইন শপ">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="theme-color" content="#006a4e">
   <link rel="canonical" href="https://ghoroa.shop/shop.html">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>">
+  <meta property="og:type" content="website">
+  <meta property="og:title" id="og-title" content="দোকান — ঘরোয়া হোমমেড মার্কেটপ্লেস">
+  <meta property="og:description" id="og-description" content="ঘরোয়া ভেরিফায়েড হোমমেড সেলারের পাবলিক শপ পেজ — ঘরে তৈরি খাঁটি পণ্য সরাসরি অর্ডার করুন।">
+  <meta property="og:url" content="https://ghoroa.shop/shop.html">
+  <meta property="og:image" id="og-image" content="https://ghoroa.shop/assets/hero.jpg">
+  <meta property="og:site_name" content="ঘরোয়া">
+  <meta property="og:locale" content="bn_BD">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" id="twitter-title" content="দোকান — ঘরোয়া হোমমেড মার্কেটপ্লেস">
+  <meta name="twitter:description" id="twitter-description" content="ঘরোয়া ভেরিফায়েড হোমমেড সেলারের পাবলিক শপ — খাঁটি ঘরোয়া পণ্য।">
+  <meta name="twitter:image" id="twitter-image" content="https://ghoroa.shop/assets/hero.jpg">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Store",
+    "name": "ঘরোয়া হোমমেড শপ",
+    "url": "https://ghoroa.shop/shop.html",
+    "description": "ঘরোয়া ভেরিফায়েড হোমমেড সেলারের পাবলিক শপ",
+    "parentOrganization": {
+      "@type": "Organization",
+      "name": "ঘরোয়া",
+      "url": "https://ghoroa.shop"
+    }
+  }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -338,7 +366,22 @@
         }
 
         currentSeller = doc.data();
-        document.title = (currentSeller.shopName || currentSeller.name || 'দোকান') + ' — ঘরোয়া';
+        const sellerTitle = (currentSeller.shopName || currentSeller.name || 'দোকান') + ' — ঘরোয়া';
+        const sellerDesc = currentSeller.story || `${currentSeller.name || 'সেলার'}-এর ঘরোয়া হোমমেড শপ — ঘরে তৈরি খাঁটি পণ্য সরাসরি অর্ডার করুন।`;
+        document.title = sellerTitle;
+
+        const metaDescEl = document.querySelector('meta[name="description"]');
+        if (metaDescEl) metaDescEl.setAttribute('content', sellerDesc);
+        const ogTitleEl = document.getElementById('og-title');
+        if (ogTitleEl) ogTitleEl.setAttribute('content', sellerTitle);
+        const ogDescEl = document.getElementById('og-description');
+        if (ogDescEl) ogDescEl.setAttribute('content', sellerDesc);
+        if (currentSeller.logoUrl || currentSeller.photoURL) {
+          const imgUrl = currentSeller.logoUrl || currentSeller.photoURL;
+          document.getElementById('og-image')?.setAttribute('content', imgUrl);
+          document.getElementById('twitter-image')?.setAttribute('content', imgUrl);
+        }
+
         document.getElementById('shop-name').textContent = currentSeller.shopName || currentSeller.name || 'দোকান';
         document.getElementById('seller-name').textContent = currentSeller.name || 'বিক্রেতা';
         document.getElementById('seller-area').textContent = '📍 ' + (currentSeller.area || 'ঢাকা');
